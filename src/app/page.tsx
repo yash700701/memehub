@@ -1,24 +1,52 @@
 "use client"
 
-import Image from "next/image";
+import axios from 'axios'
 import Header from "@/components/header";
+import { useEffect, useState } from "react";
 
+// ui imports
 
+import Image from "next/image";
+import { Toaster } from "@/components/ui/sonner"
+import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 
-import c from '@/images/3633f067-5fcf-4363-8821-f11da79cd71b.jpeg'
-import d from '@/images/3a2dccc3-773c-4631-b4c6-3c9598b762c1.jpeg'
-import e from '@/images/3cb7c303-cbcd-49cc-908c-e38c4d621bb8.jpeg'
-import f from '@/images/5ac1010f-4409-464d-adfc-5ed05acdf8bd.jpeg'
-import g from '@/images/61ff5955-c92c-4d90-b72a-77d84d4e301f.jpeg'
-import h from '@/images/7b455f15-e4f2-4eb2-9384-da574222a9d6.jpeg'
-import i from '@/images/80072546-5caa-4cb7-ba78-d9dd8f3a85f2.jpeg'
-import j from '@/images/8e5b4693-839d-4553-818e-e638788361ca.jpeg'
-import k from '@/images/9012e7a2-5131-45c0-a597-16b2e88205e4.jpeg'
-import l from '@/images/9902511d-4941-4a59-b1c6-cce4f6c7fd57.jpeg'
-import m from '@/images/a8555251-f018-4b04-8ae9-3ffe3933b30a.jpeg'
-import n from '@/images/ace614a5-12d4-4161-9664-3a2cc3e9d60b.jpeg'
-import o from '@/images/b762529c-8d5e-4d1f-be92-da80ffbc06f4.jpeg'
-import p from '@/images/e5a8cde4-48d7-4ebd-894d-2aaa0d93b3c1.jpeg'
+import {Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+// icons
 
 import unlike from '@/icons/heart (1).png'
 import play from '@/icons/play.png'
@@ -32,39 +60,135 @@ import more from '@/icons/application.png'
 import message from '@/icons/message.png'
 import home from '@/icons/home.png'
 import add from '@/icons/add.png'
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
- 
 import send from '@/icons/send.png'
-import { useState } from "react";
-
-
-
-
 
 export default function HomePage() {
 
 
-  const [isHovered, setIsHovered] = useState(false);
+  const [image, setImage] = useState<File | null>(null);
+
+  const [loading, setLoading] = useState(false);
+
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const [preview, setPreview] = useState<string | null>(null);
+
+  const [title, setTitle] = useState("");
    
-  const images = [c,d,e,f,g,h,i,j,k,l,m,n,o,p]
   const [liked, setLiked] = useState(false)
+
+  const [posts, setPosts] = useState([]);
+
+  const [commentText, setCommentText] = useState([""]);
+
+  // type declaration
+
+  type Post = {
+    imageUrl?: string;
+    title: string;
+    comments?: string[];
+  };
+
+  
+  useEffect(()=>{
+    fetchPosts()
+  },[])
+
   const handleLike = ()=>{
     setLiked((prev)=>!prev)
   }
+
+  const fetchPosts = async()=>{
+    try {
+      const res = await axios.get("/api/getPictures")
+      console.log(res.data.fetchedPosts);
+      setPosts(res.data.fetchedPosts)
+      
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+  
+    setImage(file);
+    setPreview(URL.createObjectURL(file)); // Show preview
+  };
+
+  const submitPostForm = async () => {
+    try {
+      setLoading(true)
+      setSuccessMessage("")
+
+      let imageUrl = null;
+      // Check if an image is selected
+      if (image) {
+        const formData = new FormData();
+        formData.append("file", image);
+  
+        // Make sure the URL is correctly formatted
+        const res = await axios.post("/api/upload", formData);
+        imageUrl = res.data.imgUrl;
+        console.log("Image URL:", imageUrl);
+      }
+   
+      // Sending post data
+      const response = await axios.post("/api/postPicture", { title, imageUrl });
+      if(response){
+        setSuccessMessage("uploaded successfully")
+      }else{
+        setSuccessMessage("error in uploading")
+      }
+      console.log("Post response:", response.data);
+      
+      setImage(null)
+      setTitle("")
+
+
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false)
+    }
+  };
+
+  const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+      const updatedComments = [...commentText];
+      updatedComments[index] = e.target.value;
+      setCommentText(updatedComments);
+      console.log(commentText);
+  };
+
+  const addComment = async (index: number, id: string) => {
+    try {
+        // Clear the comment after adding
+        const updatedComments = [...commentText];
+        updatedComments[index] = ""; 
+        setCommentText(updatedComments);
+
+        // Save comment to the database
+        await axios.post("/api/addComment", {
+            comment: commentText[index], 
+            postId: id,
+        });
+
+        console.log("Comment added successfully");
+    } catch (error) {
+        console.error("Error adding comment:", error);
+    }
+  };
+
   return (
    <div>
    <Header/>
-
-   {/* sidebar */}
+   <Toaster />
+  
    <div className="w-full flex h-screen bg-zinc-100">
+
+       {/* sidebar */}
+
        <div className="w-96 hidden md:flex h-screen border-zinc-100">
            <div className="w-full h-3/4 bg-zinc-100 p-5 flex flex-col justify-center border-r-[1px] border-zinc-500 mt-28">
                <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
@@ -150,16 +274,20 @@ export default function HomePage() {
 
        <div className="w-full h-screen bg-zinc-100 scroll-smooth overflow-y-auto">
           <div className="columns-1 sm:columns-2 lg:columns-3 bg-zinc-100 py-32 px-2  gap-4">
-          {images.map((img, index)=>(
-              <div key={index} className="mb-4 border-b-[1px] border-zinc-500 break-inside-avoid">
-                  <Image
-                  src={img}
-                  alt="ans"
-                  className="w-full border-[1px] border-zinc-950 object-cover rounded-lg"
+          {posts.map((post: Post, index)=>(
+              <div key={index} className="mb-4 pb-5 border-b-[1px] border-zinc-500 break-inside-avoid">
+
+                 <Image
+                    src={post.imageUrl ? post.imageUrl : "/placeholder.png"}  // Fallback image
+                    width={10}
+                    height={10}
+                    alt="ans"  
+                    unoptimized
+                    className="w-full border-[1px] border-zinc-950 object-cover rounded-lg"
                   />
-                  <div className="h-full w-10 bg-orange-500">
-                  
-                  </div>
+
+                  {/* like, comment, share and bookmarl */}
+
                   <div className="w-full py-2 h-12 flex justify-between">
                     <div className="flex gap-4 items-center">
                     <button onClick={handleLike}>
@@ -190,6 +318,55 @@ export default function HomePage() {
                     />
                     </div>
                   </div>
+                  
+                  <div className="w-full text-lg pt-1">
+                  accountName : <span className='text-sky-900'>{post.title}</span>
+                  </div>
+
+                  <div className=''>
+
+                    {/* two comments and view all comments button */}
+                    <div className='flex justify-between'>
+                      <h1>
+                        Comments:{" - "}
+                        <span className='text-sky-900'>
+                          {post.comments && post.comments.length > 0 ? post.comments[post.comments.length - 1].text : "No comments yet"}
+                        </span>
+                        <p className='text-sky-900'>
+                          <span className='pr-1'>-</span>
+                          {post.comments && post.comments.length > 1 ? post.comments[post.comments.length - 2].text : "No comments yet"}
+                        </p>
+                      </h1>
+                      <button className='text-[#B27525]  w-32 h-6 text-right mr-2'>view all</button>
+                    </div>
+
+                    {/* <div className='mt-2'>
+                    {commentText?.map((comment, idx) => (
+                        <p key={idx} className='text-gray-700'>
+                            {comment.text} - <span className='text-xs'>{comment.createdAt}</span>
+                        </p>
+                    ))}
+                    </div> */}
+
+                  </div>
+
+                  {/* add new comment */}
+                  <div className='flex justify-between mt-2'>
+                    <input
+                        className='border-none mr-2 py-1 w-full mt-1'
+                        type='text'
+                        value={commentText[index] || ""}
+                        onChange={(e) => handleCommentChange(e, index)}
+                        placeholder='Add a comment'
+                    />
+                    <button 
+                        onClick={() => addComment(index, post._id)}
+                        className='pr-2 text-[#B27525]'
+                        disabled={!commentText[index]}>
+                        Post
+                    </button>
+                </div>
+
               </div>
             ))}
             </div>
@@ -198,8 +375,68 @@ export default function HomePage() {
    </div>
    
    {/* bottom menu */}
-   <div className="h-14 w-full bg-white flex md:hidden fixed bottom-0">
-   
+   <div className="h-14 w-full bg-white flex md:hidden fixed bottom-0 justify-center">
+   <Popover>
+      <PopoverTrigger asChild>
+       
+        <Image
+          src={add}
+          alt="ans"
+          className="w-10 h-10 mt-1"
+        />
+     
+      </PopoverTrigger>
+      <PopoverContent className="w-40">
+      <Dialog>
+      <DialogTrigger asChild>
+      <h1 className="mb-2">Picture</h1>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create New Post</DialogTitle>
+          <DialogDescription>
+            {/* Make changes to your profile here. Click save when you're done. */}
+          </DialogDescription>
+        </DialogHeader>
+        <h1>Select image from your device</h1>
+        <input
+          type="file"
+          name="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
+          // onChange={(e) => setFile(e.target.files[0])}
+        />
+        <div className="w-32 h-32 rounded-lg bg-slate-50 ">
+        {preview && 
+        <Image 
+        src={preview} 
+        alt="Preview" 
+        className="w-32  h-32 object-cover rounded-lg" 
+        width={80}
+        height={80}
+        unoptimized
+        />}
+        </div>
+        <Input 
+        type="text"
+        value={title}
+        placeholder="Title ( *optional )"
+        onChange={(e)=> setTitle(e.target.value)}
+        />
+        <div className={`'w-full h-8  text-center ${successMessage == "uploaded successfully" ? "text-green-500" : "text-red-500"}`}>
+        {successMessage}
+        </div>
+        <DialogFooter>
+          <Button className="-mt-2" disabled={loading} onClick={submitPostForm}>{loading ? "Posting..." : "Post"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+       <div>hello</div>
+      </PopoverContent>
+    </Popover>
+
+
    </div>
 
    </div>
