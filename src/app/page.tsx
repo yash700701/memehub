@@ -3,9 +3,11 @@
 import axios from 'axios'
 import Header from "@/components/header";
 import { useEffect, useState } from "react";
+import { motion } from 'framer-motion';
 
 // ui imports
 
+import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image";
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner"
@@ -61,6 +63,7 @@ import message from '@/icons/message.png'
 import home from '@/icons/home.png'
 import add from '@/icons/add.png'
 import send from '@/icons/send.png'
+import { Divide, Loader } from 'lucide-react';
 
 export default function HomePage() {
 
@@ -79,7 +82,9 @@ export default function HomePage() {
 
   const [posts, setPosts] = useState([]);
 
-  const [commentText, setCommentText] = useState([""]);
+  const [commentText, setCommentText] = useState<string[]>([]);
+
+  const [visible, setVisible] = useState(false);
 
   // type declaration
 
@@ -103,7 +108,7 @@ export default function HomePage() {
       const res = await axios.get("/api/getPictures")
       console.log(res.data.fetchedPosts);
       setPosts(res.data.fetchedPosts)
-      
+      setVisible(true)
     } catch (error) {
       console.log(error);
     }
@@ -155,28 +160,33 @@ export default function HomePage() {
   };
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-      const updatedComments = [...commentText];
-      updatedComments[index] = e.target.value;
-      setCommentText(updatedComments);
-      console.log(commentText);
+    const updatedComments = [...commentText];
+    updatedComments[index] = e.target.value;
+    setCommentText(updatedComments);
+    console.log(commentText);
   };
 
   const addComment = async (index: number, id: string) => {
     try {
-        // Clear the comment after adding
-        const updatedComments = [...commentText];
-        updatedComments[index] = ""; 
-        setCommentText(updatedComments);
-
-        // Save comment to the database
-        await axios.post("/api/addComment", {
-            comment: commentText[index], 
-            postId: id,
-        });
-
-        console.log("Comment added successfully");
+      // Save comment to the database
+      await axios.post("/api/addComment", {
+        comment: commentText[index], 
+        postId: id,
+      });
+  
+      // Update the comments in the UI
+      const updatedPosts = [...posts];
+      updatedPosts[index].comments.push({ text: commentText[index], createdAt: new Date() });
+      setPosts(updatedPosts);
+  
+      // Clear the comment after adding
+      const updatedComments = [...commentText];
+      updatedComments[index] = ""; 
+      setCommentText(updatedComments);
+  
+      console.log("Comment added successfully");
     } catch (error) {
-        console.error("Error adding comment:", error);
+      console.error("Error adding comment:", error);
     }
   };
 
@@ -188,7 +198,6 @@ export default function HomePage() {
    <div className="w-full flex h-screen bg-zinc-100">
 
        {/* sidebar */}
-
        <div className="w-96 hidden md:flex h-screen border-zinc-100">
            <div className="w-full h-3/4 bg-zinc-100 p-5 flex flex-col justify-center border-r-[1px] border-zinc-500 mt-28">
                <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
@@ -273,8 +282,10 @@ export default function HomePage() {
        </div>
 
        <div className="w-full h-screen bg-zinc-100 scroll-smooth overflow-y-auto">
-          <div className="columns-1 sm:columns-2 lg:columns-3 bg-zinc-100 py-32 px-2  gap-4">
-          {posts.map((post: Post, index)=>(
+         {visible ? 
+         (<div>
+             <div className="columns-1 sm:columns-2 lg:columns-3 bg-zinc-100 py-32 px-2  gap-4">
+            {posts.map((post: Post, index)=>(
               <div key={index} className="mb-4 pb-5 border-b-[1px] border-zinc-500 break-inside-avoid">
 
                  <Image
@@ -287,7 +298,6 @@ export default function HomePage() {
                   />
 
                   {/* like, comment, share and bookmarl */}
-
                   <div className="w-full py-2 h-12 flex justify-between">
                     <div className="flex gap-4 items-center">
                     <button onClick={handleLike}>
@@ -325,28 +335,36 @@ export default function HomePage() {
 
                   <div className=''>
 
-                    {/* two comments and view all comments button */}
+                    {/* three latest comments and view all comments button */}
                     <div className='flex justify-between'>
                       <h1>
                         Comments:{" - "}
+
                         <span className='text-sky-900'>
                           {post.comments && post.comments.length > 0 ? post.comments[post.comments.length - 1].text : "No comments yet"}
                         </span>
-                        <p className='text-sky-900'>
-                          <span className='pr-1'>-</span>
-                          {post.comments && post.comments.length > 1 ? post.comments[post.comments.length - 2].text : "No comments yet"}
+
+                        {post.comments && post.comments.length > 1 ? (
+                          <p className='text-sky-900'>
+                          <span className='pr-1'>
+                            -
+                          </span>
+                          {post.comments[post.comments.length - 2].text}
                         </p>
+                        ): (<></>)}
+
+                        {post.comments && post.comments.length > 2 ? (
+                          <p className='text-sky-900'>
+                          <span className='pr-1'>
+                            -
+                          </span>
+                          {post.comments[post.comments.length - 3].text}
+                        </p>
+                        ): (<></>)}
+
                       </h1>
                       <button className='text-[#B27525]  w-32 h-6 text-right mr-2'>view all</button>
                     </div>
-
-                    {/* <div className='mt-2'>
-                    {commentText?.map((comment, idx) => (
-                        <p key={idx} className='text-gray-700'>
-                            {comment.text} - <span className='text-xs'>{comment.createdAt}</span>
-                        </p>
-                    ))}
-                    </div> */}
 
                   </div>
 
@@ -365,11 +383,37 @@ export default function HomePage() {
                         disabled={!commentText[index]}>
                         Post
                     </button>
-                </div>
+                  </div>
 
               </div>
             ))}
+          </div>
+         </div>) : 
+
+        //  Loader 
+         (<div className='flex flex-col z-0 items-center gap-10 mt-40'>
+           <div className="flex flex-col space-y-3">
+              <Skeleton className="h-[125px] bg-[#dcdcdc] w-80 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-4  bg-[#dcdcdc] w-[250px]" />
+                <Skeleton className="h-4  bg-[#dcdcdc] w-[200px]" />
+              </div>
             </div>
+           <div className="flex flex-col space-y-3">
+              <Skeleton className="h-[125px] bg-[#dcdcdc] w-80 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-4  bg-[#dcdcdc] w-[250px]" />
+                <Skeleton className="h-4  bg-[#dcdcdc] w-[200px]" />
+              </div>
+            </div>
+           <div className="flex flex-col space-y-3">
+              <Skeleton className="h-[125px] bg-[#dcdcdc] w-80 rounded-xl" />
+              <div className="space-y-2">
+                <Skeleton className="h-4  bg-[#dcdcdc] w-[250px]" />
+                <Skeleton className="h-4  bg-[#dcdcdc] w-[200px]" />
+              </div>
+            </div>
+         </div>)}
 
        </div>
    </div>
