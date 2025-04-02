@@ -233,7 +233,7 @@ export default function HomePage() {
                 />
                 <h1 className="text-zinc-800">Meme Snaps</h1>
                </Button>
-               <DropdownMenu>
+               {/* <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
                     <Image
@@ -245,14 +245,74 @@ export default function HomePage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56">
-                    {/* <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator /> */}
                     <DropdownMenuGroup>
                       <DropdownMenuItem>Photo</DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuItem>Meme Snap</DropdownMenuItem>
                   </DropdownMenuContent>
-                </DropdownMenu>
+                </DropdownMenu> */}
+
+
+                <Popover>
+                      <PopoverTrigger asChild>
+                      <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
+                      <Image
+                        src={add}
+                        alt="ans"
+                        className="w-6 h-6"
+                      />
+                      <h1 className="text-zinc-800">Post</h1>
+                      </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40">
+                      <Dialog>
+                      <DialogTrigger asChild>
+                      <h1 className="mb-2 cursor-pointer border-b-[1px] pb-2">Picture</h1>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Create New Post</DialogTitle>
+                          <DialogDescription>
+                            {/* Make changes to your profile here. Click save when you're done. */}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <h1>Select image from your device</h1>
+                        <input
+                          type="file"
+                          name="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
+                          // onChange={(e) => setFile(e.target.files[0])}
+                        />
+                        <div className="w-32 h-32 rounded-lg bg-slate-50 ">
+                        {preview && 
+                        <Image 
+                        src={preview} 
+                        alt="Preview" 
+                        className="w-32  h-32 object-cover rounded-lg" 
+                        width={80}
+                        height={80}
+                        unoptimized
+                        />}
+                        </div>
+                        <Input 
+                        type="text"
+                        value={title}
+                        placeholder="Title ( *optional )"
+                        onChange={(e)=> setTitle(e.target.value)}
+                        />
+                        <div className={`'w-full h-8  text-center ${successMessage == "uploaded successfully" ? "text-green-500" : "text-red-500"}`}>
+                        {successMessage}
+                        </div>
+                        <DialogFooter>
+                          <Button className="-mt-2" disabled={loading} onClick={submitPostForm}>{loading ? "Posting..." : "Post"}</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                      <div className=''>Video</div>
+                      </PopoverContent>
+                    </Popover>
                <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
                <Image
                   src={bookmarkl}
