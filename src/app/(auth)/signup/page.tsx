@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Loader2 } from 'lucide-react'
   
-function page() {
+function Page() {
 
 //   const { toast } = useToast()
   const router = useRouter();
@@ -92,7 +92,7 @@ function page() {
     <div className='w-full flex flex-col justify-center items-center'>
          <Toaster  position="top-center" richColors />
      <div className=' w-80 my-20'>
-     <h1 className='text-6xl  mb-10 font-bold' >New here? Let's fix that </h1>
+     <h1 className='text-6xl mb-10 font-bold'>New here? Let&apos;s fix that</h1>
      <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
@@ -177,4 +177,4 @@ function page() {
   )
 }
 
-export default page
+export default Page

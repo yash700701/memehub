@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image";
 import { Toaster } from "@/components/ui/sonner"
-import { toast } from "sonner"
+// import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
@@ -32,10 +32,8 @@ import * as React from "react"
  
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -66,17 +64,27 @@ export default function HomePage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [liked, setLiked] = useState(false)
-  const [posts, setPosts] = useState([]);
-  const [comments, setComments] = useState([]);
+  const [posts, setPosts] = useState<PostType[]>([]);
+  const [comments, setComments] = useState<CommentType[]>([]);
   const [commentText, setCommentText] = useState<string[]>([]);
   const [visible, setVisible] = useState(false);
 
   // type declaration
 
-  type Post = {
+  type CommentType = {
+    userId: string;
+    postId: string;
+    text: string;
+    createdAt: Date;
+  };
+
+  type PostType = {
+    _id: string; 
     imageUrl?: string;
     title: string;
-    comments?: string[];
+    likeCount: number;
+    commentCount: number;    
+    comments?: CommentType[];
   };
 
   useEffect(()=>{
@@ -160,7 +168,7 @@ export default function HomePage() {
   
       // Update the comments in the UI
       const updatedPosts = [...posts];
-      updatedPosts[index].comments.push({ text: commentText[index], createdAt: new Date() });
+      updatedPosts[index].comments?.push({ text: commentText[index], userId: "", postId: "", createdAt: new Date() });
       setPosts(updatedPosts);
   
       // Clear the comment after adding
@@ -342,7 +350,7 @@ export default function HomePage() {
          {visible ? 
          (<div>
              <div className="columns-1 sm:columns-2 lg:columns-3 bg-zinc-100 py-32 px-2  gap-4">
-            {posts.map((post: Post, index)=>(
+            {posts.map((post: PostType, index)=>(
               <div key={index} className="mb-4 pb-5 border-b-[1px] border-zinc-500 break-inside-avoid">
 
                  <Image

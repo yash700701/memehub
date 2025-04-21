@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import { type } from 'os';
 
 const PostSchema = new mongoose.Schema({
     imageUrl: {

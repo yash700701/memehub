@@ -21,7 +21,7 @@ export async function connect(): Promise<void>{
         console.log("db connected successfully");
         
     } catch (error) {
-        console.log("error in connecting database");
+        console.log("error in connecting database", error);
         process.exit(1)
     }
 }
