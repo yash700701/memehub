@@ -3,6 +3,7 @@ import Image from "next/image";
 import logo from '@/images/Frame 2.png'
 import profile from '@/icons/profile.png'
 import coin from '@/icons/coin.png'
+import Link from 'next/link';
 
 function header() {
   return (
@@ -19,11 +20,13 @@ function header() {
         alt="coin"
         className="w-9 h-9"
         />
+        <Link href='/profile'>
         <Image
         src={profile}
         alt="logo"
         className="w-9 h-9 mx-5"
         />
+        </Link>
         </div>
         </div>
     </header>

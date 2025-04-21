@@ -12,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner"
 // import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Loader2 } from 'lucide-react';
 
 import {Dialog,
   DialogContent,
@@ -55,8 +56,11 @@ import home from '@/icons/home.png'
 import add from '@/icons/add.png'
 import send from '@/icons/send.png'
 
+import { useSession } from 'next-auth/react';
+
 
 export default function HomePage() {
+  
 
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -66,8 +70,12 @@ export default function HomePage() {
   const [liked, setLiked] = useState(false)
   const [posts, setPosts] = useState<PostType[]>([]);
   const [comments, setComments] = useState<CommentType[]>([]);
+  const [postingComment, setPostingComment] = useState<boolean[]>([]);
   const [commentText, setCommentText] = useState<string[]>([]);
   const [visible, setVisible] = useState(false);
+
+  const { data: session } = useSession();
+  const userIdFromSession: string | undefined = session?.user?._id;
 
   // type declaration
 
@@ -158,12 +166,22 @@ export default function HomePage() {
     console.log(commentText);
   };
 
-  const addComment = async (index: number, id: string) => {
+  const addComment = async (index: number, postId: string) => {
     try {
+
+      const updatedPosting = [...postingComment];
+      updatedPosting[index] = true;
+      setPostingComment(updatedPosting);
+
       // Save comment to the database
+      console.log(commentText[index]);
+      console.log(postId);
+      console.log(userIdFromSession);
+      
       await axios.post("/api/addComment", {
         comment: commentText[index], 
-        postId: id,
+        postId: postId,
+        userId: userIdFromSession,
       });
   
       // Update the comments in the UI
@@ -179,6 +197,10 @@ export default function HomePage() {
       console.log("Comment added successfully");
     } catch (error) {
       console.error("Error adding comment:", error);
+    } finally {
+      const updatedPosting = [...postingComment];
+      updatedPosting[index] = false;
+      setPostingComment(updatedPosting);
     }
   };
 
@@ -521,10 +543,13 @@ export default function HomePage() {
                         placeholder='Add a comment'
                     />
                     <button 
-                        onClick={() => addComment(index, post._id)}
-                        className='pr-2 text-[#B27525]'
-                        disabled={!commentText[index]}>
-                        Post
+                      onClick={() => addComment(index, post._id)}
+                      className='pr-2 text-[#B27525]'
+                      disabled={!commentText[index]}
+                    >
+                      {postingComment[index] ? (
+                        <Loader2 className='animate-spin'/>
+                      ) : ('Post')}
                     </button>
                   </div>
 
