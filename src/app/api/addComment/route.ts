@@ -1,5 +1,7 @@
 import { connect } from "@/dbConfig/dbConfig";
 import Posts from '@/models/postModel';
+import Comments from "@/models/commentModel";
+import mongoose from 'mongoose';
 import { NextRequest, NextResponse } from "next/server";
 
 connect();
@@ -7,14 +9,48 @@ connect();
 export async function POST(request: NextRequest) {
     try {
         const reqBody = await request.json();
-        const { comment, postId } = reqBody;
+        const { comment, postId, userId } = reqBody;
 
-        // Update the post's comments array
+        // Validate that userId and comment are provided
+        if (!postId || !userId || !comment) {
+            return NextResponse.json({ error: "userId and comment are required" }, { status: 400 });
+        }
+
+        // Make sure userId is cast to ObjectId
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        const postObjectId = new mongoose.Types.ObjectId(postId);
+
+        // Prepare the comment object with all necessary fields
+        const newComment = {
+            userId: userObjectId,
+            postId: postObjectId,
+            text: comment,
+            createdAt: new Date(),
+        };
+
+        // Update the post's comments array, add the new comment, and increment commentCount
         const savedPost = await Posts.findByIdAndUpdate(
             postId,
-            { $push: { comments: { text: comment, createdAt: new Date() } } },  // Proper syntax to push a comment
-            { new: true }  // Return the updated document
+            {
+                $push: {
+                    comments: newComment,
+                },
+                $inc: {
+                    commentCount: 1,
+                }
+            },
+            { new: true }
         );
+
+        // If the post is updated, trim the comments to 2 latest
+        if (savedPost) {
+            // Ensure only 2 latest comments are kept
+            savedPost.comments = savedPost.comments.slice(-3);
+            await savedPost.save(); // Save the updated post with the trimmed comments
+        }
+ 
+        const new_comment = new Comments(newComment);
+        new_comment.save();    
 
         return NextResponse.json({
             message: "Comment added successfully",

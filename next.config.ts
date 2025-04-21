@@ -7,4 +7,10 @@ const nextConfig: NextConfig = {
   },
 };
 
+webpackDevMiddleware: config => {
+  config.watchOptions.ignored = ['**/.git/**', '**/node_modules/**', '**/.next/**'];
+  return config;
+}
+
+
 export default nextConfig;

@@ -2,17 +2,17 @@ import {connect } from '@/dbConfig/dbConfig'
 import Users from '@/models/userModel'
 import bcrypt from 'bcryptjs'
 import { sendVerificationEmail } from '@/helpers/sendVerificationEmail'
-import { log } from 'console';
-import { User } from 'lucide-react';
 
 export async function POST(request: Request){
     await connect();
 
     try {
         const {userName, email, password} = await request.json();
-        const existingUserVerifiedByUserName = await Users.find({userName, isVerified: true})
+        const existingUserVerifiedByUserName = await Users.findOne({userName, isVerified: true})
 
         if(existingUserVerifiedByUserName){
+            console.log(existingUserVerifiedByUserName);
+            
             return Response.json({
                 success: false,
                 message: "user name is already taken"
@@ -55,16 +55,19 @@ export async function POST(request: Request){
             email, userName, verificationCode
         )
 
-        if(!emailResponse.success){
-            return Response.json({
-                success: false,
-                message: emailResponse?.message 
-            }, {status: 500})
-        }
+        console.log(emailResponse);
+
+        // if(!emailResponse?.success){
+        //     return Response.json({
+        //         success: false,
+        //         message: emailResponse?.message 
+        //     }, {status: 500})
+        // }
 
         return Response.json({
             success: true,
-            message: "user registered successfully. Please verify your email" 
+            message: "user registered successfully. Please verify your email" ,
+            userName, email, password
         }, {status: 201})
 
     } catch (error) {

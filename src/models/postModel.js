@@ -16,13 +16,18 @@ const PostSchema = new mongoose.Schema({
     },
     comments: [
         {
-            text: {
-                type: String
-            }, 
-            createdAt: Date 
+          userId: { type: mongoose.Schema.Types.ObjectId, required: true },
+          postId: { type: mongoose.Schema.Types.ObjectId, required: true },
+          text: { type: String, required: true },
+          createdAt: { type: Date, default: Date.now },
         }
     ],
+    commentCount: { 
+        type: Number, 
+        default: 0 
+    },
+      
 })    
 
-const Posts = mongoose.model.posts || mongoose.model("posts", PostSchema);
+const Posts = mongoose.models.post || mongoose.model("post", PostSchema);
 export default Posts;

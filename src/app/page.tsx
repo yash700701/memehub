@@ -48,6 +48,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
+import * as React from "react"
+import { Minus, Plus } from "lucide-react"
+import { Bar, BarChart, ResponsiveContainer } from "recharts"
+ 
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer"
+ 
 // icons
 
 import unlike from '@/icons/heart (1).png'
@@ -65,8 +80,8 @@ import add from '@/icons/add.png'
 import send from '@/icons/send.png'
 import { Divide, Loader } from 'lucide-react';
 
-export default function HomePage() {
 
+export default function HomePage() {
 
   const [image, setImage] = useState<File | null>(null);
 
@@ -81,6 +96,8 @@ export default function HomePage() {
   const [liked, setLiked] = useState(false)
 
   const [posts, setPosts] = useState([]);
+
+  const [comments, setComments] = useState([]);
 
   const [commentText, setCommentText] = useState<string[]>([]);
 
@@ -189,6 +206,19 @@ export default function HomePage() {
       console.error("Error adding comment:", error);
     }
   };
+
+  const loadComments = async (id: string)=>{
+      try {
+        const res = await axios.post("/api/getComments", {id})
+        console.log(res.data.fetchedComments);
+        
+        setComments(res.data.fetchedComments);
+        
+      } catch (error) {
+        console.log(error);
+        
+      }
+  }
 
   return (
    <div>
@@ -341,6 +371,7 @@ export default function HomePage() {
            </div>
        </div>
 
+       {/* posts */}
        <div className="w-full h-screen bg-zinc-100 scroll-smooth overflow-y-auto">
          {visible ? 
          (<div>
@@ -367,12 +398,91 @@ export default function HomePage() {
                     className="w-8 h-8"
                     />
                     </button>
-                    <h1 className="text-zinc-900 text-xl">56</h1>
-                    <Image
-                    src={comment}
-                    alt="ans"
-                    className="w-8 h-8"
-                    />
+                    <h1 className="text-zinc-900 text-xl">{post?.likeCount}</h1>
+
+                    {/* dialog - click on comment */}
+
+                    <div className='sm:flex hidden'>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button onClick={()=>loadComments(post._id)}  className='cursor-pointer'>
+                          <Image
+                          src={comment}
+                          alt="ans"
+                          className="w-8 h-8"
+                          />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-white h-[70vh] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[800px] ">
+                    
+                        <DialogTitle></DialogTitle>
+                  
+                        <div className=" grid md:grid-cols-2 overflow-y-scroll md:overflow-hidden">
+                          <div>
+                          <Image
+                            src={post.imageUrl ? post.imageUrl : "/placeholder.png"}  // Fallback image
+                            width={10}
+                            height={10}
+                            alt="ans"  
+                            unoptimized
+                            className="w-full  border-[1px] border-zinc-950 object-cover "
+                          />
+                          </div>
+                          <div className=''>
+                          <h1 className='bg-white pb-5 text-xl md:pl-5 border-b-[1px] border-zinc-500'>account info</h1>
+                          <div className='h-[40vh] overflow-y-scroll w-full '>
+                          {comments.map((comment, index)=>(
+                            <div className='text-xl border-b-[1px] py-1 md:pl-5' key={index}>
+                            {comment.text}
+                            </div>
+                          ))}
+                          </div>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                    </div>
+
+                    {/* drawer - click on comment */}
+
+                    <div className='flex sm:hidden'>
+                      <Drawer>
+                        <DrawerTrigger asChild>
+                        <button onClick={()=>loadComments(post._id)} className='cursor-pointer'>
+                          <Image
+                          src={comment}
+                          alt="ans"
+                          className="w-8 h-8"
+                          />
+                        </button>
+                        </DrawerTrigger>
+                        <DrawerContent className=''>
+                          <div className="mx-auto px-5 pb-5 h-screen w-full max-w-sm overflow-y-scroll">
+                          <DrawerHeader>
+                            <DrawerTitle></DrawerTitle>
+                            <DrawerDescription></DrawerDescription>
+                          </DrawerHeader>
+                          <Image
+                            src={post.imageUrl ? post.imageUrl : "/placeholder.png"}  // Fallback image
+                            width={10}
+                            height={10}
+                            alt="ans"  
+                            unoptimized
+                            className="w-full border-[1px] border-zinc-950 object-cover rounded-lg"
+                          />
+                          <h1 className='text-xl font-semibold mt-5 '>Comments:</h1>
+                          {comments.map((comment, index)=>(
+                            <div className='text-xl border-b-[1px] py-1' key={index}>
+                            {comment.text}
+                            </div>
+                          ))}
+                          </div>
+                        </DrawerContent>
+                      </Drawer>
+                    </div>
+
                     <h1 className="text-zinc-900 text-xl">4</h1>
                     <Image
                     src={send}
@@ -423,7 +533,6 @@ export default function HomePage() {
                         ): (<></>)}
 
                       </h1>
-                      <button className='text-[#B27525]  w-32 h-6 text-right mr-2'>view all</button>
                     </div>
 
                   </div>
@@ -476,19 +585,32 @@ export default function HomePage() {
          </div>)}
 
        </div>
+
    </div>
    
    {/* bottom menu */}
-   <div className="h-14 w-full bg-white flex md:hidden fixed bottom-0 justify-center">
+   <div className="h-14 w-full border-t-[1px] border-black bg-white flex md:hidden fixed bottom-0 justify-center gap-8 items-center">
+
+   <Image
+      src={home}
+      alt="ans"
+      className="w-8 h-8 mt-1"
+    />
+
+   <Image
+      src={search}
+      alt="ans"
+      className="w-8 h-8 mt-1"
+    />
+
+   {/* add post  */}
    <Popover>
       <PopoverTrigger asChild>
-       
         <Image
           src={add}
           alt="ans"
           className="w-10 h-10 mt-1"
         />
-     
       </PopoverTrigger>
       <PopoverContent className="w-40">
       <Dialog>
@@ -538,7 +660,19 @@ export default function HomePage() {
     </Dialog>
        <div>hello</div>
       </PopoverContent>
-    </Popover>
+   </Popover>
+
+   <Image
+      src={play}
+      alt="ans"
+      className="w-8 h-8 mt-1"
+    />
+
+   <Image
+      src={message}
+      alt="ans"
+      className="w-8 h-8 mt-1"
+    />
 
 
    </div>
