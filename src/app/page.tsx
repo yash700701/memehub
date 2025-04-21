@@ -78,7 +78,6 @@ import message from '@/icons/message.png'
 import home from '@/icons/home.png'
 import add from '@/icons/add.png'
 import send from '@/icons/send.png'
-import { Divide, Loader } from 'lucide-react';
 
 
 export default function HomePage() {
