@@ -479,7 +479,7 @@ export default function HomePage() {
                       </Drawer>
                     </div>
 
-                    <h1 className="text-zinc-900 text-xl">4</h1>
+                    <h1 className="text-zinc-900 text-xl">{post.commentCount}</h1>
                     <Image
                     src={send}
                     alt="ans"
