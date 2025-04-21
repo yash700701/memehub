@@ -3,8 +3,13 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from 'bcryptjs'
 import {connect} from '@/dbConfig/dbConfig'
 import Users from "@/models/userModel";
-import { Label } from "@radix-ui/react-label";
-import { use } from "react";
+import { JWT } from "next-auth/jwt";
+
+interface ExtendedToken extends JWT {
+    _id?: string;
+    isVerified?: boolean;
+    userName?: string;
+}
 
 export const authOptions : NextAuthOptions = {
     providers: [
@@ -55,13 +60,15 @@ export const authOptions : NextAuthOptions = {
             }
             return token;
         },
-        async session({session, token}){
-            if(token){
-                session.user._id = token._id
-                session.user.isVerified = token.isVerified
-                session.user.userName = token.userName
+
+        
+        async session({ session, token }: { session: any; token: ExtendedToken }) {
+            if (token) {
+              session.user._id = token._id;
+              session.user.isVerified = token.isVerified;
+              session.user.userName = token.userName;
             }
-            return session
+            return session;
         }
 
     },

@@ -3,7 +3,6 @@
 import axios from 'axios'
 import Header from "@/components/header";
 import { useEffect, useState } from "react";
-import { motion } from 'framer-motion';
 
 // ui imports
 
@@ -12,7 +11,6 @@ import Image from "next/image";
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 
 import {Dialog,
@@ -30,27 +28,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-
 import * as React from "react"
-import { Minus, Plus } from "lucide-react"
-import { Bar, BarChart, ResponsiveContainer } from "recharts"
  
 import {
   Drawer,
@@ -83,23 +61,14 @@ import send from '@/icons/send.png'
 export default function HomePage() {
 
   const [image, setImage] = useState<File | null>(null);
-
   const [loading, setLoading] = useState(false);
-
   const [successMessage, setSuccessMessage] = useState("");
-
   const [preview, setPreview] = useState<string | null>(null);
-
   const [title, setTitle] = useState("");
-   
   const [liked, setLiked] = useState(false)
-
   const [posts, setPosts] = useState([]);
-
   const [comments, setComments] = useState([]);
-
   const [commentText, setCommentText] = useState<string[]>([]);
-
   const [visible, setVisible] = useState(false);
 
   // type declaration
@@ -110,7 +79,6 @@ export default function HomePage() {
     comments?: string[];
   };
 
-  
   useEffect(()=>{
     fetchPosts()
   },[])
@@ -222,8 +190,7 @@ export default function HomePage() {
   return (
    <div>
    <Header/>
-   <Toaster />
-  
+   <Toaster  position="top-center" richColors />
    <div className="w-full flex h-screen bg-zinc-100">
 
        {/* sidebar */}

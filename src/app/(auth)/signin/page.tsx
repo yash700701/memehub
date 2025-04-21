@@ -8,12 +8,6 @@ import { useState } from 'react'
 // import { useToast } from "@/components/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
-import { signupSchema } from '@/schemas/signupSchema'
-import Image from 'next/image'
-
-import bg from '@/images/cesar-wild-4ixuPGkdcaQ-unsplash.jpg'
-
-
 
 import {
   Form,
@@ -28,8 +22,9 @@ import { Loader2 } from 'lucide-react'
 import { signinSchema } from '@/schemas/signinSchema'
 import { signIn } from 'next-auth/react'
 import { toast } from 'sonner'
+import { Toaster } from "@/components/ui/sonner"
   
-function page() {
+function Page() {
 
 //   const { toast } = useToast()
   const router = useRouter();
@@ -48,30 +43,29 @@ function page() {
 
   const onSubmit = async(data: z.infer<typeof signinSchema>) => {
     setIsSubmitting(true)
+
     const result = await signIn('credentials', {
-      redirect: false,
+        redirect: false,
         identifier: data.identifier,
         password: data.password,
     })
 
     if(result?.error){
-      toast({
-        title: "login failed",
-        description: "incorrect username or password",
-        variant: "destructive" // ✅ Correct
-
-      })
+      toast.error(result.error)
+    }else{
+      toast.success("login successfull")
     }
 
     setIsSubmitting(false)
-
+    
     
     router.replace(`/`)
    
   }
 
   return (
-    <div className=' relative w-full h-screen flex justify-center items-center'>
+    <div className=' relative w-full h-screen flex flex-col items-center justify-center bg-zinc-50'>
+        <Toaster  position="top-center" richColors />
     {/* <Image
       src={bg}
       className='h-screen w-full object-cover opacity-60'   
@@ -79,8 +73,8 @@ function page() {
       width={600}
       height={400}
     /> */}
-       <div className='absolute w-96 px-5'>
-        <h1 className='text-6xl  mb-10 font-bold' >Let Me In </h1>
+       <div className='absolute w-80 '>
+        <h1 className='text-6xl text-zinc-950 mb-10 font-bold ' >Let Me In </h1>
        <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-8">
           <FormField
@@ -147,4 +141,4 @@ function page() {
   )
 }
 
-export default page
+export default Page

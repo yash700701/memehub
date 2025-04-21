@@ -38,7 +38,7 @@ import {
           </Row>
           <Row>
             <Text>
-              Thank you for registering. Please use the following verification
+              Thank you for registering on MemeHub. Please use the following verification
               code to complete your registration:
             </Text>
           </Row>

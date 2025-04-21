@@ -1,6 +1,6 @@
 "use client"
 
-import { zodResolver, ZodResolver } from '@hookform/resolvers/zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form' 
 import * as z from 'zod'
 import Link from 'next/link'
@@ -11,12 +11,11 @@ import { useDebounceCallback } from 'usehooks-ts'
 import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
 import { signupSchema } from '@/schemas/signupSchema'
-import { title } from 'process'
-import { Description } from '@radix-ui/react-dialog'
+import { toast } from 'sonner'
+import { Toaster } from "@/components/ui/sonner"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -56,10 +55,16 @@ function page() {
         try {
           const res = await axios.get(`/api/checkUserNameUniqueness?username=${userName}`)
           setUserNameMessage(res.data.message)
-        } catch (error) {
-          const axiosError = error as AxiosError
-          setUserNameMessage(axiosError.response?.data.message ?? "error checking userName")
-        } finally {
+        }catch (error) {
+            const axiosError = error as AxiosError;
+          
+            const message =
+              (axiosError.response?.data as { message?: string })?.message ??
+              "error checking userName";
+          
+            setUserNameMessage(message);
+          }
+           finally {
           setIsCheckingUserName(false)
         }
       }
@@ -70,29 +75,23 @@ function page() {
   const onSubmit = async(data: z.infer<typeof signupSchema>) => {
     setIsSubmitting(true)
     try {
-      const res = await axios.post('/api/signup', data )
-    //   toast({
-    //     title: 'success',
-    //     description: res.data.message
-    //   })
+      await axios.post('/api/signup', data )
+      toast.success("signup successfull")
       router.replace(`/verify/${userName}`)
       setIsSubmitting(false)
     } catch (error) {
       console.error("error in signup of user", error);
-      const axiosError = error as AxiosError
-      let errorMessage = axiosError.response?.data.message
-    //   toast({
-    //     title: "signup failed",
-    //     description: errorMessage,
-    //     varient: "destructive"
-    //   })
+    //   const axiosError = error as AxiosError
+    //   let errorMessage = (axiosError.response?.data as { message?: string })?.message
+         toast.error("signup failed")
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className='w-full h-screen flex justify-center items-center'>
-     <div className=' w-96 px-5'>
+    <div className='w-full flex flex-col justify-center items-center'>
+         <Toaster  position="top-center" richColors />
+     <div className=' w-80 my-20'>
      <h1 className='text-6xl  mb-10 font-bold' >New here? Let's fix that </h1>
      <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
