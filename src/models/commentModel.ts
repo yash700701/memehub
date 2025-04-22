@@ -1,7 +1,9 @@
 import mongoose, {Schema, Document} from "mongoose";
+import { string } from "zod";
 
 export interface commentType extends Document{
     userId: mongoose.Schema.Types.ObjectId;
+    userName: string;
     postId: mongoose.Schema.Types.ObjectId;
     text: string;
     createdAt: Date
@@ -10,6 +12,10 @@ export interface commentType extends Document{
 const commentSchema: Schema<commentType> = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
+        required: true,
+    },
+    userName: {
+        type: String,
         required: true,
     },
     postId: {

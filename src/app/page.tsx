@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from 'lucide-react';
 
+
 import {Dialog,
   DialogContent,
   DialogDescription,
@@ -42,19 +43,20 @@ import {
  
 // icons
 
-import unlike from '@/icons/heart (1).png'
-import play from '@/icons/play.png'
-import like from '@/icons/heart.png'
-import comment from '@/icons/comment.png'
+import unlike from '@/icons/love.png'
+import play from '@/icons/play-button.png'
+import like from '@/icons/love (1).png'
+import comment from '@/icons/chat (1).png'
 import bookmark from '@/icons/bookmark.png'
 import bookmarkl from '@/icons/bookmarkL.png'
-import profile from '@/icons/bussiness-man.png'
-import search from '@/icons/search-interface-symbol.png'
+import profile from '@/icons/profile.png'
+import search from '@/icons/magnifying-glass.png'
 import more from '@/icons/application.png'
-import message from '@/icons/message.png'
+import message from '@/icons/chat.png'
 import home from '@/icons/home.png'
-import add from '@/icons/add.png'
+import add from '@/icons/add (1).png'
 import send from '@/icons/send.png'
+import download from '@/icons/downloading.png'
 
 import { useSession } from 'next-auth/react';
 
@@ -76,11 +78,13 @@ export default function HomePage() {
 
   const { data: session } = useSession();
   const userIdFromSession: string | undefined = session?.user?._id;
+  const userNameFromSession: string | undefined = session?.user?.userName;
 
   // type declaration
 
   type CommentType = {
     userId: string;
+    userName: string | undefined;
     postId: string;
     text: string;
     createdAt: Date;
@@ -93,6 +97,9 @@ export default function HomePage() {
     likeCount: number;
     commentCount: number;    
     comments?: CommentType[];
+    userName: string,
+    userId: string,
+    date: Date,
   };
 
   useEffect(()=>{
@@ -140,7 +147,7 @@ export default function HomePage() {
       }
    
       // Sending post data
-      const response = await axios.post("/api/postPicture", { title, imageUrl });
+      const response = await axios.post("/api/postPicture", { title, imageUrl, userNameFromSession, userIdFromSession });
       if(response){
         setSuccessMessage("uploaded successfully")
       }else{
@@ -177,16 +184,19 @@ export default function HomePage() {
       console.log(commentText[index]);
       console.log(postId);
       console.log(userIdFromSession);
+      console.log(userNameFromSession);
       
       await axios.post("/api/addComment", {
         comment: commentText[index], 
         postId: postId,
         userId: userIdFromSession,
+        userName: userNameFromSession,
       });
   
       // Update the comments in the UI
       const updatedPosts = [...posts];
-      updatedPosts[index].comments?.push({ text: commentText[index], userId: "", postId: "", createdAt: new Date() });
+      updatedPosts[index].comments?.push({ text: commentText[index], userId: "", userName: userNameFromSession, postId: "", createdAt: new Date() });
+      updatedPosts[index].commentCount += 1;
       setPosts(updatedPosts);
   
       // Clear the comment after adding
@@ -217,8 +227,33 @@ export default function HomePage() {
       }
   }
 
+  function timeAgo(date: Date | string) {
+    const past = new Date(date).getTime();
+    const now = new Date().getTime(); // Always local time (JS handles the UTC offset correctly)
+  
+    const diff = (now - past) / 1000; // in seconds
+  
+    const minutes = Math.floor(diff / 60);
+    const hours = Math.floor(diff / 3600);
+    const days = Math.floor(diff / 86400);
+    const months = Math.floor(diff / (30 * 86400));
+    const years = Math.floor(diff / (365 * 86400));
+  
+    if (diff < 60) return "just now";
+    if (minutes < 60) return `${minutes} min${minutes > 1 ? "s" : ""} ago`;
+    if (hours < 24) return `${hours} hr${hours > 1 ? "s" : ""} ago`;
+    if (days < 30) return `${days} day${days > 1 ? "s" : ""} ago`;
+    if (months < 12) return `${months} month${months > 1 ? "s" : ""} ago`;
+    return `${years} year${years > 1 ? "s" : ""} ago`;
+  }
+  
+  
+  
+  
+  
+
   return (
-   <div>
+   <div className=''>
    <Header/>
    <Toaster  position="top-center" richColors />
    <div className="w-full flex h-screen bg-zinc-100">
@@ -368,21 +403,42 @@ export default function HomePage() {
        </div>
 
        {/* posts */}
-       <div className="w-full h-screen bg-zinc-100 scroll-smooth overflow-y-auto">
+       <div className="w-full h-screen bg-zinc-950 scroll-smooth overflow-y-auto">
          {visible ? 
          (<div>
-             <div className="columns-1 sm:columns-2 lg:columns-3 bg-zinc-100 py-32 px-2  gap-4">
+             <div className="columns-1 sm:columns-2 lg:columns-3 bg-zinc-950 py-24 px-2  gap-4">
             {posts.map((post: PostType, index)=>(
-              <div key={index} className="mb-4 pb-5 border-b-[1px] border-zinc-500 break-inside-avoid">
+              <div key={index} className="mb-4 pb-5 border-b-[1px] border-zinc-700 break-inside-avoid">
 
-                 <Image
-                    src={post.imageUrl ? post.imageUrl : "/placeholder.png"}  // Fallback image
-                    width={10}
-                    height={10}
-                    alt="ans"  
-                    unoptimized
-                    className="w-full border-[1px] border-zinc-950 object-cover rounded-lg"
-                  />
+                  <div className='relative'>
+                    <Image
+                      src={post.imageUrl ? post.imageUrl : "/placeholder.png"}  // Fallback image
+                      width={10}
+                      height={10}
+                      alt="ans"  
+                      unoptimized
+                      className="w-full border-[1px] border-zinc-950  object-cover rounded-xl"
+                    />
+                   <div className='absolute bottom-0 h-12 flex justify-between items-center rounded-b-xl w-full bg-[rgba(9,9,11,0.6)]'>
+                   <div className='flex'>
+                    <Image
+                        src={profile}
+                        width={10}
+                        height={10}
+                        alt="ans"
+                        unoptimized
+                        className="w-8 h-8 ml-2 border-zinc-950 object-cover rounded-xl"
+                      />
+                      <h1 className='text-white ml-2'>|</h1>
+                      <h1 className='ml-2 underline text-lg text-white'>{post.userName}</h1>
+                   </div>
+                   <div className='text-zinc-200 mr-2'>
+                      {timeAgo(post.date)}
+                   </div>
+
+
+                  </div>
+                  </div>
 
                   {/* like, comment, share and bookmarl */}
                   <div className="w-full py-2 h-12 flex justify-between">
@@ -391,10 +447,10 @@ export default function HomePage() {
                     <Image
                     src={liked ? like : unlike}
                     alt="ans"
-                    className="w-8 h-8"
+                    className="w-6 h-6"
                     />
                     </button>
-                    <h1 className="text-zinc-900 text-xl">{post?.likeCount}</h1>
+                    <h1 className=" text-zinc-200 ">{post?.likeCount}</h1>
 
                     {/* dialog - click on comment */}
 
@@ -450,7 +506,7 @@ export default function HomePage() {
                           <Image
                           src={comment}
                           alt="ans"
-                          className="w-8 h-8"
+                          className="w-6 h-6"
                           />
                         </button>
                         </DrawerTrigger>
@@ -479,51 +535,59 @@ export default function HomePage() {
                       </Drawer>
                     </div>
 
-                    <h1 className="text-zinc-900 text-xl">{post.commentCount}</h1>
+                    <h1 className="text-zinc-200 ">{post.commentCount}</h1>
                     <Image
                     src={send}
                     alt="ans"
-                    className="w-8 h-8"
+                    className="w-6 h-6"
                     />
                     </div>
-                    <div>
+                    <div className='flex gap-5'>
+                    <Image
+                    src={download}
+                    alt="ans"
+                    className="w-6 h-6"
+                    />
                     <Image
                     src={bookmark}
                     alt="ans"
-                    className="w-8 h-8"
+                    className="w-6 h-6"
                     />
                     </div>
                   </div>
                   
-                  <div className="w-full text-lg pt-1">
-                  accountName : <span className='text-sky-900'>{post.title}</span>
+                  <div className="w-full text-zinc-200 text-lg pt-1">
+                  {post.userName} : <span className='text-[#B27525]'>{post.title}</span>
                   </div>
 
                   <div className=''>
 
                     {/* three latest comments and view all comments button */}
-                    <div className='flex justify-between'>
+                    <div className=' text-lg text-zinc-200 justify-between'>
+                    Comments:{" - "}
                       <h1>
-                        Comments:{" - "}
-
-                        <span className='text-sky-900'>
-                          {post.comments && post.comments.length > 0 ? post.comments[post.comments.length - 1].text : "No comments yet"}
-                        </span>
+        
+                      <span>
+                        {post.comments && post.comments.length > 0 ? (
+                          <>
+                            {post.comments[post.comments.length - 1].userName} :{" "}
+                            {post.comments[post.comments.length - 1].text}
+                          </>
+                        ) : (
+                          "No comments yet"
+                        )}
+                      </span>
 
                         {post.comments && post.comments.length > 1 ? (
-                          <p className='text-sky-900'>
-                          <span className='pr-1'>
-                            -
-                          </span>
+                          <p className=''>
+                          {post.comments[post.comments.length - 1].userName} : {" "}
                           {post.comments[post.comments.length - 2].text}
                         </p>
                         ): (<></>)}
 
                         {post.comments && post.comments.length > 2 ? (
-                          <p className='text-sky-900'>
-                          <span className='pr-1'>
-                            -
-                          </span>
+                          <p className=''>
+                          {post.comments[post.comments.length - 1].userName} : {" "}
                           {post.comments[post.comments.length - 3].text}
                         </p>
                         ): (<></>)}
@@ -536,7 +600,7 @@ export default function HomePage() {
                   {/* add new comment */}
                   <div className='flex justify-between mt-2'>
                     <input
-                        className='border-none mr-2 py-1 w-full mt-1'
+                        className='border-b-[1px] text-zinc-200 placeholder-zinc-200 mr-2 py-1 w-full mt-1'
                         type='text'
                         value={commentText[index] || ""}
                         onChange={(e) => handleCommentChange(e, index)}
@@ -588,7 +652,7 @@ export default function HomePage() {
    </div>
    
    {/* bottom menu */}
-   <div className="h-14 w-full border-t-[1px] border-black bg-white flex md:hidden fixed bottom-0 justify-center gap-8 items-center">
+   <div className="h-16 w-full border-black bg-zinc-950 flex md:hidden fixed bottom-0 justify-center gap-8 items-center">
 
    <Image
       src={home}

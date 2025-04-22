@@ -52,7 +52,7 @@ import {
           </Row>
           <Row>
             <Button
-              href={`http://localhost:3000/verify/${username}`}
+              href={`https://memehub-xi.vercel.app/verify/${username}`}
               style={{ color: '#61dafb' }}
             >
               Verify here

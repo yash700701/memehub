@@ -8,12 +8,14 @@ connect();
 export async function POST(request: NextRequest){
     try { 
         const reqBody = await request.json()
-        const { title, imageUrl} = reqBody
+        const { title, imageUrl, userNameFromSession, userIdFromSession} = reqBody
         
         // create new post
         const newPost = new Posts({
             title,
             imageUrl,
+            userName: userNameFromSession,
+            userId: userIdFromSession
         })
          
         const savedPost = await newPost.save()

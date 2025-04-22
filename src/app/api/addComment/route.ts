@@ -9,10 +9,10 @@ connect();
 export async function POST(request: NextRequest) {
     try {
         const reqBody = await request.json();
-        const { comment, postId, userId } = reqBody;
+        const { comment, postId, userId, userName } = reqBody;
 
         // Validate that userId and comment are provided
-        if (!postId || !userId || !comment) {
+        if (!postId || !userId || !comment || !userName) {
             return NextResponse.json({ error: "userId and comment are required" }, { status: 400 });
         }
 
@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
         // Prepare the comment object with all necessary fields
         const newComment = {
             userId: userObjectId,
+            userName: userName,
             postId: postObjectId,
             text: comment,
             createdAt: new Date(),
