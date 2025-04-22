@@ -1,5 +1,4 @@
 import mongoose, {Schema, Document} from "mongoose";
-import { string } from "zod";
 
 export interface commentType extends Document{
     userId: mongoose.Schema.Types.ObjectId;
