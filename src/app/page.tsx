@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from 'lucide-react';
 
+import LikeButton from './likeButton/page';
+
 
 import {Dialog,
   DialogContent,
@@ -69,7 +71,6 @@ export default function HomePage() {
   const [successMessage, setSuccessMessage] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
   const [title, setTitle] = useState("");
-  const [liked, setLiked] = useState(false)
   const [posts, setPosts] = useState<PostType[]>([]);
   const [comments, setComments] = useState<CommentType[]>([]);
   const [postingComment, setPostingComment] = useState<boolean[]>([]);
@@ -79,6 +80,8 @@ export default function HomePage() {
   const { data: session } = useSession();
   const userIdFromSession: string | undefined = session?.user?._id;
   const userNameFromSession: string | undefined = session?.user?.userName;
+
+
 
   // type declaration
 
@@ -98,23 +101,28 @@ export default function HomePage() {
     commentCount: number;    
     comments?: CommentType[];
     userName: string,
-    userId: string,
+    userId: string | undefined,
     date: Date,
+    isLiked: boolean,
   };
+
+  interface Props {
+    index: number;
+    postId: string;
+    userId: string | undefined;
+  }
 
   useEffect(()=>{
     fetchPosts()
-  },[])
-
-  const handleLike = ()=>{
-    setLiked((prev)=>!prev)
-  }
+  },[userIdFromSession])
 
   const fetchPosts = async()=>{
+    console.log(userIdFromSession);
+    
     try {
-      const res = await axios.get("/api/getPictures")
-      console.log(res.data.fetchedPosts);
-      setPosts(res.data.fetchedPosts)
+      const res = await axios.post("/api/getPictures", {userIdFromSession})
+      console.log(res.data.postsWithLike);
+      setPosts(res.data.postsWithLike)
       setVisible(true)
     } catch (error) {
       console.log(error);
@@ -247,11 +255,6 @@ export default function HomePage() {
     return `${years} year${years > 1 ? "s" : ""} ago`;
   }
   
-  
-  
-  
-  
-
   return (
    <div className=''>
    <Header/>
@@ -443,13 +446,14 @@ export default function HomePage() {
                   {/* like, comment, share and bookmarl */}
                   <div className="w-full py-2 h-12 flex justify-between">
                     <div className="flex gap-4 items-center">
-                    <button onClick={handleLike}>
-                    <Image
-                    src={liked ? like : unlike}
-                    alt="ans"
-                    className="w-6 h-6"
+
+                    <LikeButton
+                      postId={post._id}
+                      userId={userIdFromSession}
+                      initialLiked={post.isLiked}
+                      initialCount={post.likeCount}
                     />
-                    </button>
+
                     <h1 className=" text-zinc-200 ">{post?.likeCount}</h1>
 
                     {/* dialog - click on comment */}
@@ -623,7 +627,7 @@ export default function HomePage() {
          </div>) : 
 
         //  Loader 
-         (<div className='flex flex-col z-0 items-center gap-10 mt-40'>
+         (<div className='flex flex-col z-0 items-center gap-10 mt-24'>
            <div className="flex flex-col space-y-3">
               <Skeleton className="h-[125px] bg-[#dcdcdc] w-80 rounded-xl" />
               <div className="space-y-2">
