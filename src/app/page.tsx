@@ -578,14 +578,14 @@ export default function HomePage() {
 
                         {post.comments && post.comments.length > 1 ? (
                           <p className=''>
-                          {post.comments[post.comments.length - 1].userName} : {" "}
+                          {post.comments[post.comments.length - 2].userName} : {" "}
                           {post.comments[post.comments.length - 2].text}
                         </p>
                         ): (<></>)}
 
                         {post.comments && post.comments.length > 2 ? (
                           <p className=''>
-                          {post.comments[post.comments.length - 1].userName} : {" "}
+                          {post.comments[post.comments.length - 3].userName} : {" "}
                           {post.comments[post.comments.length - 3].text}
                         </p>
                         ): (<></>)}
