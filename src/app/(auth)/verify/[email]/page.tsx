@@ -25,7 +25,7 @@ import { Loader2 } from 'lucide-react'
 function Page() {
 
   const router = useRouter()
-  const params = useParams<{userName: string}>()
+  const params = useParams<{email: string}>()
 //   const {toast} = useToast
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,8 +37,11 @@ function Page() {
   const onSubmit = async (data: z.infer<typeof verifySchema>) => {
     setIsSubmitting(true)
     try {
+      console.log(params.email);
+      console.log(data.code);
+      
         await axios.post('/api/verifyCode', {
-            userName: params.userName, 
+            email: params.email, 
             code: data.code
         })
 

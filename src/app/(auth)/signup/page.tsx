@@ -79,7 +79,7 @@ function Page() {
       
       await axios.post('/api/signup', data )
       toast.success("signup successfull")
-      router.replace(`/verify/${userName}`)
+      router.replace(`/verify/${data.email}`)
       setIsSubmitting(false)
     } catch (error) {
       console.error("error in signup of user", error);

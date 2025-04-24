@@ -4,9 +4,9 @@ import Users from '@/models/userModel'
 export async function POST(request: Request){
     await connect();
     try {
-        const {userName, code} = await request.json();
-        const decodedUserName = decodeURIComponent(userName);
-        const user = await Users.findOne({userName: decodedUserName});
+        const {email, code} = await request.json();
+        const decodedEmail = decodeURIComponent(email);
+        const user = await Users.findOne({email: decodedEmail});
         if(!user){
             return Response.json({
                 success: false,
