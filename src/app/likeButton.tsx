@@ -8,9 +8,8 @@ import Image from "next/image";
 
 interface Props {
   postId: string;
-  userId: string | undefined;
+  userId: string;
   initialLiked: boolean;
-  initialCount: number;
 }
 
 export default function LikeButton({ postId, userId, initialLiked }: Props) {

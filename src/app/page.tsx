@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from 'lucide-react';
 
-import LikeButton from './likeButton/page';
+import LikeButton from '@/app/likeButton';
 
 
 import {Dialog,
@@ -45,9 +45,8 @@ import {
  
 // icons
 
-import unlike from '@/icons/love.png'
+
 import play from '@/icons/play-button.png'
-import like from '@/icons/love (1).png'
 import comment from '@/icons/chat (1).png'
 import bookmark from '@/icons/bookmark.png'
 import bookmarkl from '@/icons/bookmarkL.png'
@@ -105,12 +104,6 @@ export default function HomePage() {
     date: Date,
     isLiked: boolean,
   };
-
-  interface Props {
-    index: number;
-    postId: string;
-    userId: string | undefined;
-  }
 
   useEffect(()=>{
     fetchPosts()
@@ -447,12 +440,13 @@ export default function HomePage() {
                   <div className="w-full py-2 h-12 flex justify-between">
                     <div className="flex gap-4 items-center">
 
-                    <LikeButton
-                      postId={post._id}
-                      userId={userIdFromSession}
-                      initialLiked={post.isLiked}
-                      initialCount={post.likeCount}
-                    />
+                    {session?.user?._id && (
+                      <LikeButton
+                        postId={post._id}
+                        userId={session.user._id}
+                        initialLiked={post.isLiked}
+                      />
+                    )}
 
                     <h1 className=" text-zinc-200 ">{post?.likeCount}</h1>
 
