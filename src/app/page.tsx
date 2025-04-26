@@ -60,6 +60,7 @@ import send from '@/icons/send.png'
 import download from '@/icons/downloading.png'
 
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 
 export default function HomePage() {
@@ -252,73 +253,54 @@ export default function HomePage() {
    <div className=''>
    <Header/>
    <Toaster  position="top-center" richColors />
-   <div className="w-full flex h-screen bg-zinc-100">
+   <div className="w-full flex h-screen bg-zinc-800">
 
        {/* sidebar */}
-       <div className="w-96 hidden md:flex h-screen border-zinc-100">
-           <div className="w-full h-3/4 bg-zinc-100 p-5 flex flex-col justify-center border-r-[1px] border-zinc-500 mt-28">
-               <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
+       <div className="w-96 hidden md:flex h-screen border-zinc-800 overflow-y-scroll">
+           <div className="w-full h-3/4 bg-zinc-800 p-5 flex flex-col justify-center mt-28">
+               <Button className="bg-zinc-800 my-2 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
                <Image
                   src={home}
                   alt="ans"
                   className="w-6 h-6"
                 />
-                <h1 className="text-zinc-800">Home</h1>
+                <h1 className="text-zinc-200">Home</h1>
                </Button>
-               <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
+               <Button className="bg-zinc-800 my-2 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
                <Image
                   src={search}
                   alt="ans"
                   className="w-6 h-6"
                 />
-                <h1 className="text-zinc-800">Search</h1>
+                <h1 className="text-zinc-200">Search</h1>
                </Button>
-               <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
+               <Button className="bg-zinc-800 my-2 py-5  shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
                <Image
                   src={message}
                   alt="ans"
                   className="w-6 h-6"
                 />
-                <h1 className="text-zinc-800">Messages</h1>
+                <h1 className="text-zinc-200">Messages</h1>
                </Button>
               
-               <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
+               <Button className="bg-zinc-800 my-2 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
                <Image
                   src={play}
                   alt="ans"
                   className="w-6 h-6"
                 />
-                <h1 className="text-zinc-800">Meme Snaps</h1>
+                <h1 className="text-zinc-200">Meme Snaps</h1>
                </Button>
-               {/* <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
-                    <Image
-                      src={add}
-                      alt="ans"
-                      className="w-6 h-6"
-                    />
-                    <h1 className="text-zinc-800">Post</h1>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56">
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem>Photo</DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuItem>Meme Snap</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu> */}
-
-
+  
                 <Popover>
                       <PopoverTrigger asChild>
-                      <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
+                      <Button className="bg-zinc-800 my-2 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
                       <Image
                         src={add}
                         alt="ans"
                         className="w-6 h-6"
                       />
-                      <h1 className="text-zinc-800">Post</h1>
+                      <h1 className="text-zinc-200">Post</h1>
                       </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-40">
@@ -370,29 +352,29 @@ export default function HomePage() {
                       <div className=''>Video</div>
                       </PopoverContent>
                     </Popover>
-               <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
+               <Button className="bg-zinc-800 my-2 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
                <Image
                   src={bookmarkl}
                   alt="ans"
                   className="w-6 h-6"
                 />
-                <h1 className="text-zinc-800">Saved</h1>
+                <h1 className="text-zinc-200">Saved</h1>
                </Button>
-               <Button className="bg-zinc-100 my-2 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
+               <Button className="bg-zinc-800 my-2 py-5  shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
                <Image
                   src={profile}
                   alt="ans"
                   className="w-6 h-6"
                 />
-                <h1 className="text-zinc-800">Profile</h1>
+                <h1 className="text-zinc-200">Profile</h1>
                </Button>
-               <Button className="bg-zinc-100 my-8 py-4 hover:bg-zinc-200 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
+               <Button className="bg-zinc-800 my-8 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
                <Image
                   src={more}
                   alt="ans"
                   className="w-6 h-6"
                 />
-                <h1 className="text-zinc-800">More</h1>
+                <h1 className="text-zinc-200">More</h1>
                </Button>
                
            </div>
@@ -426,7 +408,7 @@ export default function HomePage() {
                         className="w-8 h-8 ml-2 border-zinc-950 object-cover rounded-xl"
                       />
                       <h1 className='text-white ml-2'>|</h1>
-                      <h1 className='ml-2 underline text-lg text-white'>{post.userName}</h1>
+                      <Link href={`/profile/${post.userName}`} className='ml-2 underline text-lg text-white'>{post.userName}</Link>
                    </div>
                    <div className='text-zinc-200 mr-2'>
                       {timeAgo(post.date)}
@@ -623,21 +605,21 @@ export default function HomePage() {
         //  Loader 
          (<div className='flex flex-col z-0 items-center gap-10 mt-24'>
            <div className="flex flex-col space-y-3">
-              <Skeleton className="h-[125px] bg-[#dcdcdc] w-80 rounded-xl" />
+              <Skeleton className="h-[125px] bg-[#dcdcdc] w-[365px] rounded-xl" />
               <div className="space-y-2">
                 <Skeleton className="h-4  bg-[#dcdcdc] w-[250px]" />
                 <Skeleton className="h-4  bg-[#dcdcdc] w-[200px]" />
               </div>
             </div>
            <div className="flex flex-col space-y-3">
-              <Skeleton className="h-[125px] bg-[#dcdcdc] w-80 rounded-xl" />
+              <Skeleton className="h-[125px] bg-[#dcdcdc] w-[365px] rounded-xl" />
               <div className="space-y-2">
                 <Skeleton className="h-4  bg-[#dcdcdc] w-[250px]" />
                 <Skeleton className="h-4  bg-[#dcdcdc] w-[200px]" />
               </div>
             </div>
            <div className="flex flex-col space-y-3">
-              <Skeleton className="h-[125px] bg-[#dcdcdc] w-80 rounded-xl" />
+              <Skeleton className="h-[125px] bg-[#dcdcdc] w-[365px] rounded-xl" />
               <div className="space-y-2">
                 <Skeleton className="h-4  bg-[#dcdcdc] w-[250px]" />
                 <Skeleton className="h-4  bg-[#dcdcdc] w-[200px]" />
@@ -648,21 +630,27 @@ export default function HomePage() {
        </div>
 
    </div>
-   
+
+  
+ 
    {/* bottom menu */}
    <div className="h-16 w-full border-black bg-zinc-950 flex md:hidden fixed bottom-0 justify-center gap-8 items-center">
 
-   <Image
+   <Link href={`/`}>
+  <Image
       src={home}
       alt="ans"
       className="w-8 h-8 mt-1"
     />
+  </Link>
 
-   <Image
+  <Link href={`/search`}>
+  <Image
       src={search}
       alt="ans"
       className="w-8 h-8 mt-1"
     />
+  </Link>
 
    {/* add post  */}
    <Popover>
