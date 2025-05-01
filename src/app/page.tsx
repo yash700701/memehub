@@ -74,6 +74,7 @@ import download from '@/icons/downloading.png'
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { NextResponse } from 'next/server';
 
 export default function HomePage() {
   
@@ -274,15 +275,38 @@ export default function HomePage() {
     let actualPostType;
     if (file) {
       const type = file.type;
+    
       if (type.startsWith("image/")) {
-        actualPostType = "image"
+        actualPostType = "image";
       } else if (type.startsWith("video/")) {
-        actualPostType = "video"
-        
+        actualPostType = "video";
+    
+        // Wait for metadata before proceeding
+        const duration = await new Promise<number>((resolve, reject) => {
+          const video = document.createElement("video");
+          video.preload = "metadata";
+    
+          video.onloadedmetadata = function () {
+            window.URL.revokeObjectURL(video.src);
+            resolve(video.duration);
+          };
+    
+          video.onerror = () => reject("Failed to load video metadata");
+          video.src = URL.createObjectURL(file);
+        });
+    
+        if (duration > 20) {
+          toast("Video duration must be 20 seconds or less");
+          setLoading(false);
+          return; // Stop further execution
+        }
       } else {
         toast("Invalid file type");
+        setLoading(false);
+        return;
       }
     }
+    
 
     // Retrieve authentication parameters for the upload.
     let authParams;
@@ -768,7 +792,7 @@ export default function HomePage() {
           
           </DialogDescription>
         </DialogHeader>
-        <h1>Select image / video from your device</h1>
+        <h1>Select image / video <span>{"(<= 20 sec)"}</span> from your device</h1>
         <input
           type="file"
           name="file"
