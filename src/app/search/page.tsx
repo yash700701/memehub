@@ -42,7 +42,7 @@ const SearchBar = () => {
   };
 
   return (
-   <div className='p-2 bg-zinc-950'>
+   <div className='p-2 pt-20 bg-zinc-950'>
      <div className="relative h-screen text-zinc-200 w-full bg-zinc-950 max-w-md">
       <div className='flex'>
       <input
@@ -50,7 +50,7 @@ const SearchBar = () => {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search users..."
-        className="w-full px-4 py-2 rounded border border-gray-300"
+        className="w-full px-4 py-2 rounded-lg border border-gray-300"
       />
       <div className='h-10 w-10 flex justify-center items-center'>
       { loading ? (<Loader2/>) : ("") }
@@ -58,7 +58,7 @@ const SearchBar = () => {
       </div>
 
         {query.length > 1 && (
-        <ul className="absolute w-full mt-2 bg-zinc-950 z-10 border rounded shadow">
+        <ul className="absolute w-full mt-2 bg-zinc-950 z-10 border rounded-lg shadow">
             {results.length > 0 ? (
             results.map((user: userType) => (
                 <li

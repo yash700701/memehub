@@ -73,8 +73,8 @@ function Page() {
   }, [userIdFromSession]);
 
   return (
-    <div className="bg-zinc-950 min-h-screen w-full text-white">
-    <div className="max-w-4xl mx-auto py-8 px-4 flex flex-col gap-6">
+    <div className="bg-zinc-950 pt-16 min-h-screen w-full text-white">
+    <div className="max-w-4xl mx-auto py-8 px-2 flex flex-col gap-6">
       {/* Profile Header */}
       <div className="flex items-center gap-6 bg-zinc-800 p-6 rounded-2xl shadow-lg">
         <Image
@@ -84,7 +84,7 @@ function Page() {
           className="w-24 h-24 rounded-full object-cover border-2 border-zinc-600"
         />
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">@{userName}</h1>
+          <h1 className="text-2xl font-bold">@{userName}</h1>
           {userNameFromSession === userName ? (
             <Button 
               onClick={handleLogout} 
