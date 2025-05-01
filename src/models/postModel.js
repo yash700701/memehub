@@ -1,7 +1,12 @@
 import mongoose from 'mongoose'
 
+
 const PostSchema = new mongoose.Schema({
-    imageUrl: {
+    url: {
+        type: String,
+        required: true,
+    },
+    postType: {
         type: String,
         required: true,
     },

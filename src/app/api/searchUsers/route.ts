@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
     const users = await Users.find({
       userName: { $regex: query, $options: "i" }, // Case-insensitive partial match
-    }).limit(10);
+    }).limit(10).lean();
 
     return NextResponse.json({ users });
   } catch (error) {

@@ -10,7 +10,7 @@ export async function POST(req: NextRequest){
      
         const reqBody = await req.json()
         const {id} = reqBody;
-        const fetchedComments = await Comments.find({postId: id})
+        const fetchedComments = await Comments.find({postId: id}).lean()
         
         return NextResponse.json({
             mesage: "comments fetched succsessfully", 

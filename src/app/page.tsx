@@ -4,6 +4,7 @@ import axios from 'axios'
 import Header from "@/components/header";
 import { useEffect, useState } from "react";
 
+
 // ui imports
 
 import { Skeleton } from "@/components/ui/skeleton"
@@ -13,6 +14,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import LikeButton from '@/app/likeButton';
 
@@ -42,6 +44,16 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
+
+import {
+  ImageKitAbortError,
+  ImageKitInvalidRequestError,
+  ImageKitServerError,
+  ImageKitUploadNetworkError,
+  upload,
+} from "@imagekit/next";
+import { useRef } from "react";
+
  
 // icons
 
@@ -61,12 +73,10 @@ import download from '@/icons/downloading.png'
 
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-
+import { toast } from 'sonner';
 
 export default function HomePage() {
   
-
-  const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
@@ -81,8 +91,7 @@ export default function HomePage() {
   const userIdFromSession: string | undefined = session?.user?._id;
   const userNameFromSession: string | undefined = session?.user?.userName;
 
-
-
+  
   // type declaration
 
   type CommentType = {
@@ -95,7 +104,7 @@ export default function HomePage() {
 
   type PostType = {
     _id: string; 
-    imageUrl?: string;
+    url?: string;
     title: string;
     likeCount: number;
     commentCount: number;    
@@ -106,6 +115,16 @@ export default function HomePage() {
     isLiked: boolean,
   };
 
+  const router = useRouter();
+
+  useEffect(() => {
+    router.prefetch("/");
+  }, []);
+
+  useEffect(() => {
+    router.prefetch("/videos");
+  }, []);
+
   useEffect(()=>{
     fetchPosts()
   },[userIdFromSession])
@@ -114,7 +133,7 @@ export default function HomePage() {
     console.log(userIdFromSession);
     
     try {
-      const res = await axios.post("/api/getPictures", {userIdFromSession})
+      const res = await axios.post("/api/getPictures", {userIdFromSession, postType: "image"})
       console.log(res.data.postsWithLike);
       setPosts(res.data.postsWithLike)
       setVisible(true)
@@ -127,45 +146,8 @@ export default function HomePage() {
     const file = e.target.files?.[0];
     if (!file) return;
   
-    setImage(file);
+    // setImage(file);
     setPreview(URL.createObjectURL(file)); // Show preview
-  };
-
-  const submitPostForm = async () => {
-    try {
-      setLoading(true)
-      setSuccessMessage("")
-
-      let imageUrl = null;
-      // Check if an image is selected
-      if (image) {
-        const formData = new FormData();
-        formData.append("file", image);
-  
-        // Make sure the URL is correctly formatted
-        const res = await axios.post("/api/upload", formData);
-        imageUrl = res.data.imgUrl;
-        console.log("Image URL:", imageUrl);
-      }
-   
-      // Sending post data
-      const response = await axios.post("/api/postPicture", { title, imageUrl, userNameFromSession, userIdFromSession });
-      if(response){
-        setSuccessMessage("uploaded successfully")
-      }else{
-        setSuccessMessage("error in uploading")
-      }
-      console.log("Post response:", response.data);
-      
-      setImage(null)
-      setTitle("")
-
-
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false)
-    }
   };
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
@@ -248,15 +230,130 @@ export default function HomePage() {
     if (months < 12) return `${months} month${months > 1 ? "s" : ""} ago`;
     return `${years} year${years > 1 ? "s" : ""} ago`;
   }
-  
-  return (
-   <div className=''>
-   <Header/>
-   <Toaster  position="top-center" richColors />
-   <div className="w-full flex h-screen bg-zinc-800">
 
-       {/* sidebar */}
-       <div className="w-96 hidden md:flex h-screen border-zinc-800 overflow-y-scroll">
+  
+  const [progress, setProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortController = new AbortController();
+  
+  const authenticator = async () => {
+    try {
+        // Perform the request to the upload authentication endpoint.
+        const response = await fetch("/api/imagekit-auth");
+        if (!response.ok) {
+            // If the server response is not successful, extract the error text for debugging.
+            const errorText = await response.text();
+            throw new Error(`Request failed with status ${response.status}: ${errorText}`);
+        }
+
+        // Parse and destructure the response JSON for upload credentials.
+        const data = await response.json();
+        const { signature, expire, token, publicKey } = data;
+        return { signature, expire, token, publicKey };
+    } catch (error) {
+        // Log the original error for debugging before rethrowing a new error.
+        console.error("Authentication error:", error);
+        throw new Error("Authentication request failed");
+    }
+  };
+
+  const handleUpload = async () => {
+  
+    // Access the file input element using the ref
+    const fileInput = fileInputRef.current;
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        toast("Please select a file to upload");
+        return;
+    }
+
+    setLoading(true)
+    setSuccessMessage("")
+
+    // Extract the first file from the file input
+    const file = fileInput.files[0];
+    let actualPostType;
+    if (file) {
+      const type = file.type;
+      if (type.startsWith("image/")) {
+        actualPostType = "image"
+      } else if (type.startsWith("video/")) {
+        actualPostType = "video"
+        
+      } else {
+        toast("Invalid file type");
+      }
+    }
+
+    // Retrieve authentication parameters for the upload.
+    let authParams;
+    try {
+        authParams = await authenticator();
+    } catch (authError) {
+        console.error("Failed to authenticate for upload:", authError);
+        return;
+    }
+    const { signature, expire, token, publicKey } = authParams;
+
+    // Call the ImageKit SDK upload function with the required parameters and callbacks.
+  
+    try {
+        const uploadResponse = await upload({
+            // Authentication parameters
+            expire,
+            token,
+            signature,
+            publicKey,
+            file,
+            fileName: file.name, // Optionally set a custom file name
+            // Progress callback to update upload progress state
+            onProgress: (event) => {
+                setProgress((event.loaded / event.total) * 100);
+            },
+            // Abort signal to allow cancellation of the upload if needed.
+            abortSignal: abortController.signal,
+        });
+        console.log("Upload response:", uploadResponse.url);
+
+        const url = uploadResponse.url;
+
+        const response = await axios.post("/api/uploadPost", { title, url, actualPostType, userNameFromSession, userIdFromSession });
+        if(response){
+          setSuccessMessage("uploaded successfully")
+        }else{
+          setSuccessMessage("error in uploading")
+        }
+        console.log("Post response:", response.data);
+      
+        setTitle("")
+
+    } catch (error) {
+        // Handle specific error types provided by the ImageKit SDK.
+        if (error instanceof ImageKitAbortError) {
+            console.error("Upload aborted:", error.reason);
+        } else if (error instanceof ImageKitInvalidRequestError) {
+            console.error("Invalid request:", error.message);
+        } else if (error instanceof ImageKitUploadNetworkError) {
+            console.error("Network error:", error.message);
+        } else if (error instanceof ImageKitServerError) {
+            console.error("Server error:", error.message);
+        } else {
+            // Handle any other errors that may occur.
+            console.error("Upload error:", error);
+        }
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
+  return (
+  <div className=''>
+  <Header/>
+  <Toaster  position="top-center" richColors />
+  <div className="w-full flex h-screen bg-zinc-800">
+
+    {/* sidebar */}
+    <div className="w-96 hidden md:flex h-screen border-zinc-800 overflow-y-scroll">
            <div className="w-full h-3/4 bg-zinc-800 p-5 flex flex-col justify-center mt-28">
                <Button className="bg-zinc-800 my-2 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
                <Image
@@ -319,10 +416,11 @@ export default function HomePage() {
                         <input
                           type="file"
                           name="file"
-                          accept="image/*"
+                          ref={fileInputRef}
+                          accept="image/*, video/*"
                           onChange={handleFileChange}
                           className="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
-                          // onChange={(e) => setFile(e.target.files[0])}
+                        
                         />
                         <div className="w-32 h-32 rounded-lg bg-slate-50 ">
                         {preview && 
@@ -344,8 +442,9 @@ export default function HomePage() {
                         <div className={`'w-full h-8  text-center ${successMessage == "uploaded successfully" ? "text-green-500" : "text-red-500"}`}>
                         {successMessage}
                         </div>
+                        <progress value={progress} max={100}></progress>
                         <DialogFooter>
-                          <Button className="-mt-2" disabled={loading} onClick={submitPostForm}>{loading ? "Posting..." : "Post"}</Button>
+                          <Button className="-mt-2" disabled={loading} onClick={handleUpload}>{loading ? "Posting..." : "Post"}</Button>
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
@@ -378,10 +477,10 @@ export default function HomePage() {
                </Button>
                
            </div>
-       </div>
+    </div>
 
-       {/* posts */}
-       <div className="w-full h-screen bg-zinc-950 scroll-smooth overflow-y-auto">
+    {/* posts */}
+    <div className="w-full h-screen bg-zinc-950 scroll-smooth overflow-y-auto">
          {visible ? 
          (<div>
              <div className="columns-1 sm:columns-2 lg:columns-3 bg-zinc-950 py-24 px-2  gap-4">
@@ -390,7 +489,7 @@ export default function HomePage() {
 
                   <div className='relative'>
                     <Image
-                      src={post.imageUrl ? post.imageUrl : "/placeholder.png"}  // Fallback image
+                      src={post.url ? post.url : "/placeholder.png"}  // Fallback image
                       width={10}
                       height={10}
                       alt="ans"  
@@ -452,7 +551,7 @@ export default function HomePage() {
                         <div className=" grid md:grid-cols-2 overflow-y-scroll md:overflow-hidden">
                           <div>
                           <Image
-                            src={post.imageUrl ? post.imageUrl : "/placeholder.png"}  // Fallback image
+                            src={post.url ? post.url : "/placeholder.png"}  // Fallback image
                             width={10}
                             height={10}
                             alt="ans"  
@@ -497,7 +596,7 @@ export default function HomePage() {
                             <DrawerDescription></DrawerDescription>
                           </DrawerHeader>
                           <Image
-                            src={post.imageUrl ? post.imageUrl : "/placeholder.png"}  // Fallback image
+                            src={post.url ? post.url : "/placeholder.png"}  // Fallback image
                             width={10}
                             height={10}
                             alt="ans"  
@@ -537,7 +636,11 @@ export default function HomePage() {
                   </div>
                   
                   <div className="w-full text-zinc-200 text-lg pt-1">
-                  {post.userName} : <span className='text-[#B27525]'>{post.title}</span>
+                  {post.title.length > 0 ? (
+                    <div>
+                      {post.userName} : <span className='text-[#B27525]'>{post.title}</span>
+                    </div>
+                  ) : ("")}
                   </div>
 
                   <div className=''>
@@ -627,60 +730,53 @@ export default function HomePage() {
             </div>
          </div>)}
 
-       </div>
+    </div>
 
-   </div>
+  </div>
 
-  
- 
-   {/* bottom menu */}
-   <div className="h-16 w-full border-black bg-zinc-950 flex md:hidden fixed bottom-0 justify-center gap-8 items-center">
+  {/* bottom menu */}
+  <div className="h-16 w-full border-black bg-zinc-950 flex md:hidden fixed bottom-0 justify-center gap-8 items-center">
+    <Link href={`/`}>
+      <Image
+        src={home}
+        alt="ans"
+        className="w-8 h-8 mt-1"
+      />
+    </Link>
 
-   <Link href={`/`}>
-  <Image
-      src={home}
-      alt="ans"
-      className="w-8 h-8 mt-1"
-    />
-  </Link>
+    <Link href={`/search`}>
+      <Image
+        src={search}
+        alt="ans"
+        className="w-8 h-8 mt-1"
+      />
+    </Link>
 
-  <Link href={`/search`}>
-  <Image
-      src={search}
-      alt="ans"
-      className="w-8 h-8 mt-1"
-    />
-  </Link>
-
-   {/* add post  */}
-   <Popover>
-      <PopoverTrigger asChild>
+    {/* picture upload */}
+    <Dialog>
+      <DialogTrigger asChild>
         <Image
           src={add}
           alt="ans"
           className="w-10 h-10 mt-1"
         />
-      </PopoverTrigger>
-      <PopoverContent className="w-40">
-      <Dialog>
-      <DialogTrigger asChild>
-      <h1 className="mb-2">Picture</h1>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create New Post</DialogTitle>
           <DialogDescription>
-            {/* Make changes to your profile here. Click save when you're done. */}
+          
           </DialogDescription>
         </DialogHeader>
-        <h1>Select image from your device</h1>
+        <h1>Select image / video from your device</h1>
         <input
           type="file"
           name="file"
-          accept="image/*"
+          ref={fileInputRef}
+          accept="image/*, video/*"
           onChange={handleFileChange}
           className="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
-          // onChange={(e) => setFile(e.target.files[0])}
+         
         />
         <div className="w-32 h-32 rounded-lg bg-slate-50 ">
         {preview && 
@@ -702,20 +798,20 @@ export default function HomePage() {
         <div className={`'w-full h-8  text-center ${successMessage == "uploaded successfully" ? "text-green-500" : "text-red-500"}`}>
         {successMessage}
         </div>
+        <progress value={progress} className='h-1 ' max={100}></progress>
         <DialogFooter>
-          <Button className="-mt-2" disabled={loading} onClick={submitPostForm}>{loading ? "Posting..." : "Post"}</Button>
+          <Button className="-mt-2" disabled={loading} onClick={handleUpload}>{loading ? "Posting..." : "Post"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-       <div>hello</div>
-      </PopoverContent>
-   </Popover>
 
-   <Image
-      src={play}
-      alt="ans"
-      className="w-8 h-8 mt-1"
-    />
+    <Link href={`/videos`}>
+      <Image
+        src={play}
+        alt="ans"
+        className="w-8 h-8 mt-1"
+      />
+    </Link>
 
    <Image
       src={message}

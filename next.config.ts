@@ -30,6 +30,15 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  // images: {
+  //   remotePatterns: [
+  //     {
+  //       protocol: "https",
+  //       hostname: "ik.imagekit.io",
+  //       port: "" 
+  //     }
+  //   ]
+  // }
 };
 
 export default nextConfig;

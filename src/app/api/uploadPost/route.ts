@@ -8,12 +8,13 @@ connect();
 export async function POST(request: NextRequest){
     try { 
         const reqBody = await request.json()
-        const { title, imageUrl, userNameFromSession, userIdFromSession} = reqBody
+        const { title, url, actualPostType, userNameFromSession, userIdFromSession} = reqBody
         
         // create new post
         const newPost = new Posts({
             title,
-            imageUrl,
+            url,
+            postType: actualPostType,
             userName: userNameFromSession,
             userId: userIdFromSession
         })

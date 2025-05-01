@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form' 
 import * as z from 'zod'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 // import { useToast } from "@/components/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { useRouter } from 'next/navigation'
@@ -23,11 +23,15 @@ import { signinSchema } from '@/schemas/signinSchema'
 import { signIn } from 'next-auth/react'
 import { toast } from 'sonner'
 import { Toaster } from "@/components/ui/sonner"
+
   
 function Page() {
 
 //   const { toast } = useToast()
   const router = useRouter();
+  useEffect(() => {
+    router.prefetch("/");
+  }, []);
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 

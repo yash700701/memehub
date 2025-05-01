@@ -10,13 +10,13 @@ export async function POST(req: NextRequest) {
   try {
     // get userId from query param or session
     const reqBody = await req.json();
-    const {userIdFromSession} = reqBody;
+    const {userIdFromSession, postType} = reqBody;
 
     if (!userIdFromSession) {
       return NextResponse.json({ error: "Missing userId" }, { status: 400 });
     }
 
-    const fetchedPosts = await Posts.find().lean();
+    const fetchedPosts = await Posts.find({postType: postType}).sort({date: -1}).lean();
     const likedPosts = await Likes.find({ userId: userIdFromSession }).lean();
 
     const likedPostIds = likedPosts.map((like) => like.postId.toString());
