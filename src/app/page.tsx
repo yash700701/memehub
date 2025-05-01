@@ -74,7 +74,6 @@ import download from '@/icons/downloading.png'
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { NextResponse } from 'next/server';
 
 export default function HomePage() {
   
