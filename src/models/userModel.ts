@@ -5,6 +5,7 @@ import mongoose, {Schema, Document} from "mongoose";
 export interface userType extends Document{
     userName: string;
     email: string;
+    coinCount: number;
     password: string;
     isVerified: boolean;
     verificationCode: string;
@@ -23,6 +24,10 @@ const userSchema: Schema<userType> = new mongoose.Schema({
         required: [true, "emial is required"],
         unique: true,
         match: [/.+\@.+\..+/, 'please use a valid email address']
+    },
+    coinCount: {
+        type: Number,
+        default: 0,
     },
     password: {
         type: String,

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { useSession, signOut } from 'next-auth/react'
 import profile from '@/icons/profile.png'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation';
+
 
 type CommentType = {
   userId: string;
@@ -18,8 +20,9 @@ type CommentType = {
 
 type PostType = {
   _id: string;
-  imageUrl?: string;
+  url?: string;
   title: string;
+  postType: string;
   likeCount: number;
   commentCount: number;
   comments?: CommentType[];
@@ -40,6 +43,20 @@ function Page() {
   const userIdFromSession: string | undefined = session?.user?._id;
   const userNameFromSession: string | undefined = session?.user?.userName;
 
+  const router = useRouter();
+
+    useEffect(() => {
+      router.prefetch("/");
+    }, []);
+  
+    useEffect(() => {
+      router.prefetch("/coins");
+    }, []);
+
+     useEffect(() => {
+      router.prefetch("/search");
+    }, []);
+  
   const handleLogout = async () => {
     await signOut({ callbackUrl: "/signin" });
   };
@@ -50,6 +67,8 @@ function Page() {
 
   const fetchPosts = async () => {
     try {
+      console.log(userIdFromSession, userName);
+      
       const res = await axios.post("/api/getPicturesForProfilePage", { userIdFromSession, userName });
       setPosts(res.data.fetchedPosts);
     } catch (error) {
@@ -73,7 +92,7 @@ function Page() {
   }, [userIdFromSession]);
 
   return (
-    <div className="bg-zinc-950 pt-16 min-h-screen w-full text-white">
+    <div className="bg-zinc-950 py-16 min-h-screen w-full text-white">
     <div className="max-w-4xl mx-auto py-8 px-2 flex flex-col gap-6">
       {/* Profile Header */}
       <div className="flex items-center gap-6 bg-zinc-800 p-6 rounded-2xl shadow-lg">
@@ -88,7 +107,7 @@ function Page() {
           {userNameFromSession === userName ? (
             <Button 
               onClick={handleLogout} 
-              className="w-32 bg-red-200 hover:bg-red-300 text-red-500 font-semibold"
+              className="w-32 text-red-500 font-semibold"
             >
               Logout
             </Button>
@@ -117,16 +136,25 @@ function Page() {
                   key={post._id} 
                   className="group bg-zinc-800 rounded-2xl overflow-hidden border border-zinc-700 hover:scale-[1.02] transition-transform duration-300"
                 >
-                  {post.imageUrl && (
-                    <Image 
-                      src={post.imageUrl} 
-                      height={300} 
-                      width={300} 
-                      unoptimized 
-                      alt="Post" 
-                      className="w-full h-60 object-cover"
+                  
+                   {post.postType == "image" ? (
+                      <Image
+                      src={post.url ? post.url : "/placeholder.png"}  // Fallback image
+                      width={10}
+                      height={10}
+                      alt="ans"  
+                      unoptimized
+                      className="w-full border-[1px] border-zinc-950  object-cover rounded-xl"
+                    />
+                  ) : (
+                    <video
+                    src={post.url ? post.url : "/placeholder.png"} // Replace this with your video URL
+                    controls muted loop playsInline
+                    autoPlay
+                    className="w-full pt-5 rounded-lg shadow-md"
                     />
                   )}
+                 
                   <div className="p-4 flex flex-col gap-2">
                     <p className="text-lg font-semibold truncate">{post.title}</p>
                     <div className="text-sm text-gray-400 flex justify-between items-center">
@@ -136,7 +164,7 @@ function Page() {
                     {userNameFromSession === post.userName && (
                       <Button
                         onClick={() => handleDeletePost(post._id)}
-                        className="mt-2 w-full bg-red-200 hover:bg-red-300 text-red-500 font-medium rounded-lg"
+                        className="mt-2 w-full text-red-500 font-medium rounded-lg"
                       >
                         Delete
                       </Button>

@@ -1,8 +1,6 @@
 import React from 'react'
 import Image from "next/image";
-import logo from '@/images/Frame 2.png'
 import profile from '@/icons/profile.png'
-import coin from '@/icons/coin.png'
 
 
 import { useSession } from 'next-auth/react';
@@ -17,24 +15,16 @@ function Header() {
   return (
     <header className="w-full fixed z-10 top-0 p-2">
         <div className={`h-14 transition ease-in-out w-full bg-zinc-950  justify-between items-center flex shadow-lg border-[1px] border-zinc-400 shadow-black rounded-xl`}>
-        <Image
-        src={logo}
-        alt="logo"
-        className="w-36 h-7 mx-5"
-        />
+        <h1 className='text-zinc-100 text-4xl font-bold ml-4'>Mim<span className='text-[#B27525]'>zy</span></h1>
         <div className='flex'>
-        <Image
+        <Link href={'/coins'}>
+        {/* <Image
         src={coin}
         alt="coin"
         className="w-9 h-9"
-        />
-        {/* <Link href={`/profile/${userName}`}>
-        <Image
-        src={profile}
-        alt="logo"
-        className="w-9 h-9 mx-5"
-        />
-        </Link> */}
+        /> */}
+        <h1 className='font-extrabold text-3xl'>🪙</h1>
+        </Link>
         <Link href={`/profile/${userName}`}>
         <Image
         src={profile}

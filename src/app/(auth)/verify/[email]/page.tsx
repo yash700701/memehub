@@ -7,8 +7,8 @@ import { useParams, useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-import { toast } from 'sonner'
 import { Toaster } from "@/components/ui/sonner"
+import { toast } from 'sonner';
 
 import { Button } from "@/components/ui/button"
 import {
@@ -26,7 +26,6 @@ function Page() {
 
   const router = useRouter()
   const params = useParams<{email: string}>()
-//   const {toast} = useToast
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof verifySchema>>({
@@ -46,8 +45,8 @@ function Page() {
         })
 
         router.replace(`/`)
-
         toast.success("verification successfull")
+
     } catch (error) {
         console.error("error in signup of user", error);
         toast("error in verifying code")

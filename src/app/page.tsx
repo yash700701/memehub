@@ -3,6 +3,7 @@
 import axios from 'axios'
 import Header from "@/components/header";
 import { useEffect, useState } from "react";
+import SideBar from '@/components/sideBar'
 
 
 // ui imports
@@ -11,7 +12,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image";
 import { Toaster } from "@/components/ui/sonner"
 // import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -20,18 +20,12 @@ import LikeButton from '@/app/likeButton';
 
 import {Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+
 
 import * as React from "react"
  
@@ -48,16 +42,9 @@ import {
 // icons
 
 
-import play from '@/icons/play-button.png'
 import comment from '@/icons/chat (1).png'
 import bookmark from '@/icons/bookmark.png'
-import bookmarkl from '@/icons/bookmarkL.png'
 import profile from '@/icons/profile.png'
-import search from '@/icons/magnifying-glass.png'
-import more from '@/icons/application.png'
-import message from '@/icons/chat.png'
-import home from '@/icons/home.png'
-import add from '@/icons/add (1).png'
 import send from '@/icons/send.png'
 import download from '@/icons/downloading.png'
 
@@ -90,6 +77,7 @@ export default function HomePage() {
   type PostType = {
     _id: string; 
     url?: string;
+    postType: string;
     title: string;
     likeCount: number;
     commentCount: number;    
@@ -107,7 +95,11 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    router.prefetch("/videos");
+    router.prefetch("/coins");
+  }, []);
+
+  useEffect(() => {
+    router.prefetch("/search");
   }, []);
 
   useEffect(()=>{
@@ -118,7 +110,7 @@ export default function HomePage() {
     console.log(userIdFromSession);
     
     try {
-      const res = await axios.post("/api/getPictures", {userIdFromSession, postType: "image"})
+      const res = await axios.post("/api/getPictures", {userIdFromSession})
       console.log(res.data.postsWithLike);
       setPosts(res.data.postsWithLike)
       setVisible(true)
@@ -216,131 +208,8 @@ export default function HomePage() {
   <div className="w-full flex h-screen bg-zinc-800">
 
     {/* sidebar */}
-    <div className="w-96 hidden md:flex h-screen border-zinc-800 overflow-y-scroll">
-           <div className="w-full h-3/4 bg-zinc-800 p-5 flex flex-col justify-center mt-28">
-               <Button className="bg-zinc-800 my-2 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
-               <Image
-                  src={home}
-                  alt="ans"
-                  className="w-6 h-6"
-                />
-                <h1 className="text-zinc-200">Home</h1>
-               </Button>
-               <Button className="bg-zinc-800 my-2 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
-               <Image
-                  src={search}
-                  alt="ans"
-                  className="w-6 h-6"
-                />
-                <h1 className="text-zinc-200">Search</h1>
-               </Button>
-               <Button className="bg-zinc-800 my-2 py-5  shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
-               <Image
-                  src={message}
-                  alt="ans"
-                  className="w-6 h-6"
-                />
-                <h1 className="text-zinc-200">Messages</h1>
-               </Button>
-              
-               <Button className="bg-zinc-800 my-2 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
-               <Image
-                  src={play}
-                  alt="ans"
-                  className="w-6 h-6"
-                />
-                <h1 className="text-zinc-200">Meme Snaps</h1>
-               </Button>
-  
-                <Popover>
-                      <PopoverTrigger asChild>
-                      <Button className="bg-zinc-800 my-2 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
-                      <Image
-                        src={add}
-                        alt="ans"
-                        className="w-6 h-6"
-                      />
-                      <h1 className="text-zinc-200">Post</h1>
-                      </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-40">
-                      <Dialog>
-                      <DialogTrigger asChild>
-                      <h1 className="mb-2 cursor-pointer border-b-[1px] pb-2">Picture</h1>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                          <DialogTitle>Create New Post</DialogTitle>
-                          <DialogDescription>
-                            {/* Make changes to your profile here. Click save when you're done. */}
-                          </DialogDescription>
-                        </DialogHeader>
-                        {/* <h1>Select image from your device</h1>
-                        <input
-                          type="file"
-                          name="file"
-                          ref={fileInputRef}
-                          accept="image/*, video/*"
-                          onChange={handleFileChange}
-                          className="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
-                        
-                        />
-                        <div className="w-32 h-32 rounded-lg bg-slate-50 ">
-                        {preview && 
-                        <Image 
-                        src={preview} 
-                        alt="Preview" 
-                        className="w-32  h-32 object-cover rounded-lg" 
-                        width={80}
-                        height={80}
-                        unoptimized
-                        />}
-                        </div>
-                        <Input 
-                        type="text"
-                        value={title}
-                        placeholder="Title ( *optional )"
-                        onChange={(e)=> setTitle(e.target.value)}
-                        />
-                        <div className={`'w-full h-8  text-center ${successMessage == "uploaded successfully" ? "text-green-500" : "text-red-500"}`}>
-                        {successMessage}
-                        </div>
-                        <progress value={progress} max={100}></progress> */}
-                        <DialogFooter>
-                          {/* <Button className="-mt-2" disabled={loading} onClick={handleUpload}>{loading ? "Posting..." : "Post"}</Button> */}
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                      <div className=''>Video</div>
-                      </PopoverContent>
-                    </Popover>
-               <Button className="bg-zinc-800 my-2 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
-               <Image
-                  src={bookmarkl}
-                  alt="ans"
-                  className="w-6 h-6"
-                />
-                <h1 className="text-zinc-200">Saved</h1>
-               </Button>
-               <Button className="bg-zinc-800 my-2 py-5  shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
-               <Image
-                  src={profile}
-                  alt="ans"
-                  className="w-6 h-6"
-                />
-                <h1 className="text-zinc-200">Profile</h1>
-               </Button>
-               <Button className="bg-zinc-800 my-8 py-5 shadow-none hover:border-[1px] border-zinc-500 w-60 flex justify-start">
-               <Image
-                  src={more}
-                  alt="ans"
-                  className="w-6 h-6"
-                />
-                <h1 className="text-zinc-200">More</h1>
-               </Button>
-               
-           </div>
-    </div>
+    <SideBar/>
+   
 
     {/* posts */}
     <div className="w-full h-screen bg-zinc-950 scroll-smooth overflow-y-auto">
@@ -351,15 +220,25 @@ export default function HomePage() {
               <div key={index} className="mb-4 pb-5 border-b-[1px] border-zinc-700 break-inside-avoid">
 
                   <div className='relative'>
-                    <Image
-                      src={post.url ? post.url : "/placeholder.png"}  // Fallback image
-                      width={10}
-                      height={10}
-                      alt="ans"  
-                      unoptimized
-                      className="w-full border-[1px] border-zinc-950  object-cover rounded-xl"
-                    />
-                   <div className='absolute bottom-0 h-12 flex justify-between items-center rounded-b-xl w-full bg-[rgba(9,9,11,0.6)]'>
+                   
+                    {post.postType == "image" ? (
+                         <Image
+                         src={post.url ? post.url : "/placeholder.png"}  // Fallback image
+                         width={10}
+                         height={10}
+                         alt="ans"  
+                         unoptimized
+                         className="w-full border-[1px] border-zinc-950  object-cover rounded-xl"
+                       />
+                    ) : (
+                      <video
+                      src={post.url ? post.url : "/placeholder.png"} // Replace this with your video URL
+                      controls muted loop playsInline
+                      autoPlay
+                      className="w-full pt-5 rounded-xl shadow-md"
+                      />
+                    )}
+                   <div className=' h-12 flex justify-between items-center w-full bg-[rgba(9,9,11,0.6)]'>
                    <div className='flex'>
                     <Image
                         src={profile}
@@ -367,12 +246,12 @@ export default function HomePage() {
                         height={10}
                         alt="ans"
                         unoptimized
-                        className="w-8 h-8 ml-2 border-zinc-950 object-cover rounded-xl"
+                        className="w-8 h-8 border-zinc-950 object-cover rounded-xl"
                       />
                       <h1 className='text-white ml-2'>|</h1>
                       <Link href={`/profile/${post.userName}`} className='ml-2 underline text-lg text-white'>{post.userName}</Link>
                    </div>
-                   <div className='text-zinc-200 mr-2'>
+                   <div className='text-zinc-200'>
                       {timeAgo(post.date)}
                    </div>
 
