@@ -21,12 +21,8 @@ const TransactionSchema: Schema<TransactionType> = new mongoose.Schema({
    amount: {
       type: Number,
       required: true,
-   },
-   createdAt: { 
-      type: Date, 
-      default: Date.now 
    }
-})
+}, { timestamps: true })
 
 const Transactions = mongoose.models.transactions as mongoose.Model<TransactionType> || mongoose.model<TransactionType>("transaction", TransactionSchema)
 

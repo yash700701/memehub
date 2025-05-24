@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
+import Header from '@/components/header'
+import BottomMenu from '@/components/bottomMenu'
 
 type userType = {
   _id: string,
@@ -42,8 +44,10 @@ const SearchBar = () => {
   };
 
   return (
+   <>
+    <Header/>
    <div className='p-2 pt-20 bg-zinc-950'>
-     <div className="relative h-screen text-zinc-200 w-full bg-zinc-950 max-w-md">
+     <div className="relative h-[80vh] text-zinc-200 w-full bg-zinc-950 max-w-md">
       <div className='flex'>
       <input
         type="text"
@@ -63,7 +67,7 @@ const SearchBar = () => {
             results.map((user: userType) => (
                 <li
                 key={user._id}
-                className="p-2 hover:bg-gray-100 text-white cursor-pointer"
+                className="p-2 text-white cursor-pointer"
                 onClick={() => router.push(`/profile/${user.userName}`)}
                 >
                 @{user.userName}
@@ -77,6 +81,8 @@ const SearchBar = () => {
 
     </div>
    </div>
+   <BottomMenu/>
+   </>
   );
 };
 

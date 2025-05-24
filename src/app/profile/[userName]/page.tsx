@@ -92,7 +92,7 @@ function Page() {
   }, [userIdFromSession]);
 
   return (
-    <div className="bg-zinc-950 py-16 min-h-screen w-full text-white">
+    <div className="bg-zinc-950  min-h-screen w-full text-white">
     <div className="max-w-4xl mx-auto py-8 px-2 flex flex-col gap-6">
       {/* Profile Header */}
       <div className="flex items-center gap-6 bg-zinc-800 p-6 rounded-2xl shadow-lg">

@@ -76,7 +76,7 @@ const CoinPage = () => {
 
   return (
    <div className="w-full bg-zinc-950">
-        <div className="max-w-6xl py-24  mx-auto p-6 space-y-6">
+        <div className="max-w-6xl   mx-auto p-6 space-y-6">
       {/* Total Coins */}
       <Card className="bg-gradient-to-r from-yellow-300 to-yellow-500 text-white text-center shadow-xl rounded-2xl">
         <CardContent className="py-10">

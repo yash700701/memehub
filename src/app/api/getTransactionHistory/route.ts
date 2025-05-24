@@ -10,7 +10,10 @@ export async function POST(req: NextRequest){
      
         const reqBody = await req.json()
         const {userIdFromSession} = reqBody;
-        const transactions = await Transactions.find({userId: userIdFromSession}).lean()
+        const transactions = await Transactions.find({ userId: userIdFromSession })
+        .sort({ createdAt: -1 }) // descending order (most recent first)
+        .lean();
+
         
         return NextResponse.json({
             mesage: "comments fetched succsessfully", 

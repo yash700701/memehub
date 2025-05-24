@@ -206,7 +206,7 @@ function PostIcon() {
       <Image
         src={add}
         alt="ans"
-        className="w-9 h-9 mt-1"
+        className="w-9 h-9 mt-1 cursor-pointer"
       />
     </DialogTrigger>
     <DialogContent className="sm:max-w-[425px]">

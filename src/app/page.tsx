@@ -50,6 +50,7 @@ import download from '@/icons/downloading.png'
 
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import BottomMenu from '@/components/bottomMenu';
 
 export default function HomePage() {
   
@@ -100,6 +101,10 @@ export default function HomePage() {
 
   useEffect(() => {
     router.prefetch("/search");
+  }, []);
+
+  useEffect(() => {
+    router.prefetch(`/profile/${userNameFromSession}`);
   }, []);
 
   useEffect(()=>{
@@ -475,7 +480,7 @@ export default function HomePage() {
     </div>
 
   </div>
-
+  <BottomMenu/>
    </div>
 
   );
